@@ -3,15 +3,14 @@ package crypts;
 import interfaces.Encryption;
 import javaapplication2.MyAlphabet;
 
-public class CodewordCrypt implements Encryption {
+public class CodewordCrypt  {
     
     private MyAlphabet a; //английский исходный алфавит
 
     public CodewordCrypt() {
         a = new MyAlphabet();
     }
-    
-    @Override
+
     public String encrypt(String plainText, String key) {
         MyAlphabet b = new MyAlphabet(a); //алфавит подстановки
         b.insertCodeword(key); //вставка слова вначале нового алфавита
@@ -24,7 +23,6 @@ public class CodewordCrypt implements Encryption {
         return cipherText;
     }
     
-    @Override
     public String decrypt(String cipherText, String key) {
         MyAlphabet b = new MyAlphabet(a);
         b.insertCodeword(key);

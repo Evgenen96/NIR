@@ -1,6 +1,5 @@
 package crypts;
 
-
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -25,31 +24,25 @@ public class VernameCrypt {
             bytePlainText[i] = (byte) (cipherText[i] ^ byteKey[i % key.length()]);
         }
         String plainText = new String(bytePlainText);
-       return plainText;
+        return plainText;
     }
-    
-    public void encryptFile(String fileName, String key) throws IOException {
-        byte[] fileArray = Files.readAllBytes(Paths.get(fileName));
+
+    public byte[] encryptFile(byte[] fileArray, String key) {
         byte[] byteKey = key.getBytes();
         byte[] byteCipher = new byte[fileArray.length];
         for (int i = 0; i < fileArray.length; i++) {
             byteCipher[i] = (byte) (fileArray[i] ^ byteKey[i % key.length()]);
         }
-        FileOutputStream fos = new FileOutputStream(fileName);
-        fos.write(byteCipher);
-        fos.close();
+        return byteCipher;
     }
-    
-    public void decryptFile(String fileName, String key) throws IOException {
-        byte[] fileArray = Files.readAllBytes(Paths.get(fileName));
+
+    public byte[] decryptFile(byte[] fileArray, String key) {
         byte[] byteKey = key.getBytes();
-        byte[] byteCipher = new byte[fileArray.length];
+        byte[] byteFile = new byte[fileArray.length];
         for (int i = 0; i < fileArray.length; i++) {
-            byteCipher[i] = (byte) (fileArray[i] ^ byteKey[i % key.length()]);
+            byteFile[i] = (byte) (fileArray[i] ^ byteKey[i % key.length()]);
         }
-        FileOutputStream fos = new FileOutputStream(fileName);
-        fos.write(byteCipher);
-        fos.close();
+        return byteFile;
     }
-    
+
 }

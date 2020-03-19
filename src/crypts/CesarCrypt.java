@@ -44,8 +44,7 @@ public class CesarCrypt implements Encryption {
         return plainText;
     }
 
-    public void encryptFile(String fileName, String key) throws IOException {
-        byte[] fileArray = Files.readAllBytes(Paths.get(fileName));
+    public byte[] encryptFile(byte[] fileArray, String key) {
         byte[] byteCipher = new byte[fileArray.length];
         int[] arrange = getColArrange(key);
         int pos = 0;
@@ -58,14 +57,11 @@ public class CesarCrypt implements Encryption {
                 }
             }
         }
-        FileOutputStream fos = new FileOutputStream(fileName);
-        fos.write(byteCipher);
-        fos.close();
+        return byteCipher;
     }
 
-    public void decryptFile(String fileName, String key) throws IOException {
-        byte[] fileArray = Files.readAllBytes(Paths.get(fileName));
-        byte[] byteCipher = new byte[fileArray.length];
+    public byte[] decryptFile(byte[] fileArray, String key) {
+        byte[] byteFile = new byte[fileArray.length];
         int[] arrange = getColArrange(key);
         int[] newArrange = new int[arrange.length];
         for (int i = 0; i < arrange.length; i++) {
@@ -77,13 +73,11 @@ public class CesarCrypt implements Encryption {
                 if (newArrange[col] * fileArray.length / key.length() + row % fileArray.length / key.length() >= fileArray.length) {
 
                 } else {
-                    byteCipher[pos++] = fileArray[(newArrange[col] * fileArray.length / key.length() + row % (fileArray.length / key.length()))];
+                    byteFile[pos++] = fileArray[(newArrange[col] * fileArray.length / key.length() + row % (fileArray.length / key.length()))];
                 }
             }
         }
-        FileOutputStream fos = new FileOutputStream(fileName);
-        fos.write(byteCipher);
-        fos.close();
+        return byteFile;
     }
 
     private int[] getColArrange(String key) {

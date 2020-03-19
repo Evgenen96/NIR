@@ -62,8 +62,8 @@ public class SimpleCrypt implements Encryption {
         return plainText;
     }
 
-    public void encryptFile(String fileName, String key) throws IOException {
-        byte[] fileArray = Files.readAllBytes(Paths.get(fileName));
+    public byte[] encryptFile(byte[] fileArray, String key) {
+        
         byte[] byteCipher = new byte[fileArray.length];
         String temp = "";
         int[] keyArr = new int[key.length()];
@@ -83,14 +83,15 @@ public class SimpleCrypt implements Encryption {
                 byteCipher[pos++] = fileArray[keyArr.length * blockNumber + keyArr[offset]];
             }
         }
-        FileOutputStream fos = new FileOutputStream(fileName);
-        fos.write(byteCipher);
-        fos.close();
+        return byteCipher;
     }
 
-    public void decryptFile(String fileName, String key) throws IOException {
-        byte[] fileArray = Files.readAllBytes(Paths.get(fileName));
-        byte[] byteCipher = new byte[fileArray.length];
+    public byte[] decryptFile(byte[] fileArray, String key) {
+
+
+        byte[] byteFile = new byte[fileArray.length];
+        
+       
         String temp = "";
         int[] keyArr = new int[key.length()];
 
@@ -101,7 +102,7 @@ public class SimpleCrypt implements Encryption {
         }
 
         int lastBlockFix = 0; //когда неидеальные блоки
-        for (int blockNumber = 0; blockNumber <= fileArray.length / key.length(); blockNumber++) {
+        for (int blockNumber = 0; blockNumber <= (fileArray.length / key.length()); blockNumber++) {
             for (int enOffset = 0; enOffset < key.length(); enOffset++) {
                 if (key.length() * blockNumber + keyArr[enOffset] >= fileArray.length) {
                     lastBlockFix++;
@@ -110,11 +111,11 @@ public class SimpleCrypt implements Encryption {
                 if (key.length() * blockNumber + enOffset - lastBlockFix >= fileArray.length) {
                     break;
                 }
-                byteCipher[key.length() * blockNumber + keyArr[enOffset]] = fileArray[key.length() * blockNumber + enOffset - lastBlockFix];
+                byteFile[key.length() * blockNumber + keyArr[enOffset]] = fileArray[key.length() * blockNumber + enOffset - lastBlockFix];
             }
         }
-        FileOutputStream fos = new FileOutputStream(fileName);
-        fos.write(byteCipher);
-        fos.close();
+       
+         
+        return byteFile;
     }
 }

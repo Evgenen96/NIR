@@ -1,13 +1,12 @@
 package crypts;
 
-import interfaces.Encryption;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
 public class GammaCrypt {
-    
+
     public byte[] encrypt(String plainText, String key) {
         RandomLemer R = new RandomLemer(Integer.valueOf(key));
         byte[] arr = plainText.getBytes();
@@ -27,35 +26,28 @@ public class GammaCrypt {
         System.out.println(new String(plainText));
         return new String(plainText);
     }
-    
-    public byte[] encryptFile(String fileName, String key) throws IOException {
-        byte[] fileArray = Files.readAllBytes(Paths.get(fileName));
+
+    public byte[] encryptFile(byte[] fileArray, String key) {
         RandomLemer R = new RandomLemer(Integer.valueOf(key));
         byte[] byteCipher = new byte[fileArray.length];
         for (int i = 0; i < fileArray.length; i++) {
             byteCipher[i] = (byte) (fileArray[i] ^ R.next());
         }
-        FileOutputStream fos = new FileOutputStream(fileName);
-        fos.write(byteCipher);
-        fos.close();
         return byteCipher;
     }
-    
-    public byte[] decryptFile(String fileName, String key) throws IOException {
-        byte[] fileArray = Files.readAllBytes(Paths.get(fileName));
+
+    public byte[] decryptFile(byte[] fileArray, String key) {
         RandomLemer R = new RandomLemer(Integer.valueOf(key));
-        byte[] byteCipher = new byte[fileArray.length];
+        byte[] byteFile = new byte[fileArray.length];
         for (int i = 0; i < fileArray.length; i++) {
-            byteCipher[i] = (byte) (fileArray[i] ^ R.next());
+            byteFile[i] = (byte) (fileArray[i] ^ R.next());
         }
-        FileOutputStream fos = new FileOutputStream(fileName);
-        fos.write(byteCipher);
-        fos.close();
-        return byteCipher;
+        return byteFile;
     }
 
 }
 //реализцаия генератора псевдослучайных чисел методом Лемера
+
 class RandomLemer {
 
     private final static int A = 3, B = 2, C = 101;

@@ -19,10 +19,11 @@ import javax.crypto.spec.SecretKeySpec;
 
 public class RSA2Crypt {
 
-    private KeyPair keyPair; 
+    private KeyPair keyPair;
     private KeyPairGenerator keyPairGenerator;
     private KeyGenerator generator;
     private SecretKey secKey;
+    private byte[] encryptedKey;
 
     public RSA2Crypt() throws NoSuchAlgorithmException, NoSuchPaddingException {
         keyPairGenerator = KeyPairGenerator.getInstance("RSA");
@@ -46,7 +47,7 @@ public class RSA2Crypt {
         return plainText;
     }
 
-    public byte[] encryptFile(String fileName) throws NoSuchPaddingException, InvalidKeyException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, IOException {
+    public byte[] encryptFile(byte[] fileArray) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
 
         //генерация симметричного ключа
         secKey = generator.generateKey();
@@ -54,11 +55,7 @@ public class RSA2Crypt {
         //шифрование файла
         Cipher aesCipher = Cipher.getInstance("AES");
         aesCipher.init(Cipher.ENCRYPT_MODE, secKey);
-        byte[] fileArray = Files.readAllBytes(Paths.get(fileName));
         byte[] byteCipher = aesCipher.doFinal(fileArray);
-        FileOutputStream fos = new FileOutputStream(fileName);
-        fos.write(byteCipher);
-        fos.close();
 
         //генерация ключевой пары
         keyPair = keyPairGenerator.generateKeyPair();
@@ -67,12 +64,16 @@ public class RSA2Crypt {
         Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
         cipher.init(Cipher.PUBLIC_KEY, keyPair.getPublic());
         byte[] encryptedKey = cipher.doFinal(secKey.getEncoded());
+        for (int i = 0; i < encryptedKey.length; i++) {
+            System.out.print(encryptedKey[i] + " ");
+        }
 
         //передача ключа
-        return encryptedKey;
+        this.encryptedKey = encryptedKey;
+        return byteCipher;
     }
 
-    public void decryptFile(String fileName, byte[] encryptedKey) throws NoSuchPaddingException, InvalidKeyException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, IOException {
+    public byte[] decryptFile(byte[] fileArray) throws NoSuchPaddingException, InvalidKeyException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, IOException {
 
         //расшифровка ключа
         Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
@@ -83,12 +84,7 @@ public class RSA2Crypt {
         //расшифровка файла
         Cipher aesCipher = Cipher.getInstance("AES");
         aesCipher.init(Cipher.DECRYPT_MODE, originalKey);
-        byte[] fileArray = Files.readAllBytes(Paths.get(fileName));
-        byte[] byteCipher = aesCipher.doFinal(fileArray);
-
-        //запись в файл
-        FileOutputStream fos = new FileOutputStream(fileName);
-        fos.write(byteCipher);
-        fos.close();
+        byte[] byteFile = aesCipher.doFinal(fileArray);
+        return byteFile;
     }
 }

@@ -1,62 +1,26 @@
 package javaapplication2;
 
-import com.sun.crypto.provider.RSACipher;
-import crypts.CesarCrypt;
-import crypts.CodewordCrypt;
-import crypts.GammaCrypt;
-import crypts.RSA2Crypt;
-import crypts.RSACrypt;
-import crypts.SimpleCrypt;
-import crypts.VernameCrypt;
-import java.io.IOException;
-import java.security.InvalidKeyException;
+import crypts.CryptTypes;
+import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
 public class JavaApplication2 {
 
     public static void main(String[] args) {
         try {
-
-// char n = (char)(p^s);
-// CodewordCrypt cc1 = new CodewordCrypt();
-            //VernameCrypt cc2 = new VernameCrypt();
-            //GammaCrypt cc2 = new GammaCrypt();
-            //SimpleCrypt cc2 = new SimpleCrypt();
-            CesarCrypt cc2 = new CesarCrypt();
-            RSA2Crypt rsa = new RSA2Crypt();
-            //cc2.encryptFile("src/res/file1.docx", "hype");
-            rsa.encryptFile("src/res/file1.docx");
-           // rsa.decryptFile("src/res/file1.docx", rsa.encryptFile("src/res/file1.docx"));
-            //cc2.decrypt(cc2.encrypt("rabota", "key"),"key");
-            //rsa.encryptFile("src/res/alena.jpg");
-
-// cc.decrypt(cc.encrypt("WorkIsDone", "15"),"15");
-//cc2.decrypt(cc2.encrypt("WorkIsDonedgtr", "3124"),"3124");
-//cc1.decrypt("dceh", "drow");  
-        } catch (NoSuchPaddingException ex) {
-            Logger.getLogger(JavaApplication2.class.getName()).log(Level.SEVERE, null, ex);
+            Crypt c = new Crypt();
+            //System.out.println(new String("работа не волк".getBytes()));
+            byte[] s = c.encryptText(CryptTypes.CESAR, "абрамов илья сергеевич", "дяди");
+            String d = c.decryptText(CryptTypes.CESAR, s, "дяди");
+            System.out.println(d);
         } catch (NoSuchAlgorithmException ex) {
             Logger.getLogger(JavaApplication2.class.getName()).log(Level.SEVERE, null, ex);
-//        } catch (InvalidKeyException ex) {
-//            Logger.getLogger(JavaApplication2.class.getName()).log(Level.SEVERE, null, ex);
-//        } catch (IllegalBlockSizeException ex) {
-//            Logger.getLogger(JavaApplication2.class.getName()).log(Level.SEVERE, null, ex);
-//        } catch (BadPaddingException ex) {
-//            Logger.getLogger(JavaApplication2.class.getName()).log(Level.SEVERE, null, ex);
-//        } catch (IOException ex) {
-//            Logger.getLogger(JavaApplication2.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
+        } catch (NoSuchPaddingException ex) {
             Logger.getLogger(JavaApplication2.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InvalidKeyException ex) {
-            Logger.getLogger(JavaApplication2.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IllegalBlockSizeException ex) {
-            Logger.getLogger(JavaApplication2.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (BadPaddingException ex) {
+        } catch (UnsupportedEncodingException ex) {
             Logger.getLogger(JavaApplication2.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
