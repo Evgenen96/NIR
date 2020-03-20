@@ -1,32 +1,35 @@
 package crypts;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import interfaces.EncryptedText;
+import interfaces.Encryption;
 
-public class GammaCrypt {
+public class GammaCrypt implements Encryption{
 
-    public byte[] encrypt(String plainText, String key) {
+    @Override
+    public EncryptedText encrypt(String plainText, String key) {
+        EncryptedText eText = new EncryptedText();
         RandomLemer R = new RandomLemer(Integer.valueOf(key));
         byte[] arr = plainText.getBytes();
-        byte[] cipherText = new byte[arr.length];
+        byte[] enText = new byte[arr.length];
         for (int i = 0; i < arr.length; i++) {
-            cipherText[i] = (byte) (arr[i] ^ R.next());
+            enText[i] = (byte) (arr[i] ^ R.next());
         }
-        return cipherText;
+        eText.setText(enText);
+        return eText;
     }
 
-    public String decrypt(byte[] cipherText, String key) {
+    @Override
+    public String decrypt(EncryptedText eText, String key) {
+        byte[] enText = eText.getByteText();
         RandomLemer R = new RandomLemer(Integer.valueOf(key));
-        byte[] plainText = new byte[cipherText.length];
-        for (int i = 0; i < cipherText.length; i++) {
-            plainText[i] = (byte) (cipherText[i] ^ R.next());
+        byte[] deText = new byte[enText.length];
+        for (int i = 0; i < enText.length; i++) {
+            deText[i] = (byte) (enText[i] ^ R.next());
         }
-        System.out.println(new String(plainText));
-        return new String(plainText);
+        return new String(deText);
     }
 
+    @Override
     public byte[] encryptFile(byte[] fileArray, String key) {
         RandomLemer R = new RandomLemer(Integer.valueOf(key));
         byte[] byteCipher = new byte[fileArray.length];
@@ -36,6 +39,7 @@ public class GammaCrypt {
         return byteCipher;
     }
 
+    @Override
     public byte[] decryptFile(byte[] fileArray, String key) {
         RandomLemer R = new RandomLemer(Integer.valueOf(key));
         byte[] byteFile = new byte[fileArray.length];

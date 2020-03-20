@@ -1,38 +1,51 @@
 package crypts;
 
+import interfaces.EncryptedText;
 import interfaces.Encryption;
 import javaapplication2.MyAlphabet;
 
-public class CodewordCrypt  {
-    
+public class CodewordCrypt implements Encryption{
+
     private MyAlphabet a; //английский исходный алфавит
 
     public CodewordCrypt() {
         a = new MyAlphabet();
     }
 
-    public String encrypt(String plainText, String key) {
+    @Override
+    public EncryptedText encrypt(String plainText, String key) {
+        EncryptedText eText = new EncryptedText();
         MyAlphabet b = new MyAlphabet(a); //алфавит подстановки
         b.insertCodeword(key); //вставка слова вначале нового алфавита
-        String cipherText = "";
+        String enText = "";
         for (int i = 0; i < plainText.length(); i++) {
-            cipherText = cipherText + b.getChar(a.getInt(plainText.charAt(i)));
+            enText = enText + b.getChar(a.getInt(plainText.charAt(i)));
         }
-        
-        System.out.println(cipherText);
-        return cipherText;
+        eText.setText(enText);
+        return eText;
     }
-    
-    public String decrypt(String cipherText, String key) {
+
+    @Override
+    public String decrypt(EncryptedText eText, String key) {
         MyAlphabet b = new MyAlphabet(a);
+        String enText = eText.getText();
         b.insertCodeword(key);
-        String plainText = "";
-        for (int i = 0; i < cipherText.length(); i++) {
-            plainText = plainText + b.getChar(a.getInt(cipherText.charAt(i)));
+        String deText = "";
+        for (int i = 0; i < enText.length(); i++) {
+            deText = deText + b.getChar(a.getInt(enText.charAt(i)));
         }
-        
-        System.out.println(plainText);
-        return plainText;
+
+        return deText;
     }
-    
+
+    @Override
+    public byte[] encryptFile(byte[] fileArray, String key) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public byte[] decryptFile(byte[] fileArray, String key) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
 }

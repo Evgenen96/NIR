@@ -1,32 +1,35 @@
 package crypts;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import interfaces.EncryptedText;
+import interfaces.Encryption;
 
-public class VernameCrypt {
+public class VernameCrypt implements Encryption {
 
-    public byte[] encrypt(String plainText, String key) {
+    @Override
+    public EncryptedText encrypt(String plainText, String key) {
+        EncryptedText eText = new EncryptedText();
         byte[] byteText = plainText.getBytes();
         byte[] byteKey = key.getBytes();
-        byte[] byteCipher = new byte[plainText.length()];
-        for (int i = 0; i < plainText.length(); i++) {
-            byteCipher[i] = (byte) (byteText[i] ^ byteKey[i % key.length()]);
+        byte[] enText = new byte[byteText.length];
+        for (int i = 0; i < byteText.length; i++) {
+            enText[i] = (byte) (byteText[i] ^ byteKey[i % key.length()]);
         }
-        return byteCipher;
+        eText.setText(enText);
+        return eText;
     }
 
-    public String decrypt(byte[] cipherText, String key) {
+    @Override
+    public String decrypt(EncryptedText eText, String key) {
+        byte[] enText = eText.getByteText();
         byte[] byteKey = key.getBytes();
-        byte[] bytePlainText = new byte[cipherText.length];
-        for (int i = 0; i < cipherText.length; i++) {
-            bytePlainText[i] = (byte) (cipherText[i] ^ byteKey[i % key.length()]);
+        byte[] deText = new byte[enText.length];
+        for (int i = 0; i < enText.length; i++) {
+            deText[i] = (byte) (enText[i] ^ byteKey[i % key.length()]);
         }
-        String plainText = new String(bytePlainText);
-        return plainText;
+        return new String(deText);
     }
 
+    @Override
     public byte[] encryptFile(byte[] fileArray, String key) {
         byte[] byteKey = key.getBytes();
         byte[] byteCipher = new byte[fileArray.length];
@@ -36,6 +39,7 @@ public class VernameCrypt {
         return byteCipher;
     }
 
+    @Override
     public byte[] decryptFile(byte[] fileArray, String key) {
         byte[] byteKey = key.getBytes();
         byte[] byteFile = new byte[fileArray.length];

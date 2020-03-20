@@ -1,67 +1,69 @@
 package crypts;
 
+import interfaces.EncryptedText;
 import interfaces.Encryption;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 public class CesarCrypt implements Encryption {
 
     @Override
-    public String encrypt(String plainText, String key) {
-        String cipherText = "";
+    public EncryptedText encrypt(String plainText, String key) {
+        EncryptedText eText = new EncryptedText();
+        String enText = "";
         int[] arrange = getColArrange(key);
         for (int row = 0; row < key.length(); row++) {
             for (int col = 0; col <= plainText.length() / key.length(); col++) {
                 if (col * key.length() + arrange[row] % key.length() >= plainText.length()) {
-                    cipherText = cipherText + " ";
+                    enText = enText + " ";
                 } else {
-                    cipherText = cipherText + plainText.charAt(col * key.length() + arrange[row] % key.length());
+                    enText = enText + plainText.charAt(col * key.length() + arrange[row] % key.length());
                 }
             }
         }
-        return cipherText;
+        eText.setText(enText);
+        return eText;
     }
 
     @Override
-    public String decrypt(String cipherText, String key) {
-        String plainText = "";
+    public String decrypt(EncryptedText eText, String key) {
+        String deText = "";
+        String enText = eText.getText();
         int[] arrange = getColArrange(key);
         int[] newArrange = new int[arrange.length];
         for (int i = 0; i < arrange.length; i++) {
             newArrange[arrange[i]] = i;
         }
-        for (int row = 0; row < cipherText.length() / key.length(); row++) {
+        for (int row = 0; row < enText.length() / key.length(); row++) {
             for (int col = 0; col < key.length(); col++) {
-                if (newArrange[col] * cipherText.length() / key.length() + row % cipherText.length() / key.length() >= cipherText.length()) {
+                if (newArrange[col] * enText.length() / key.length() + row % enText.length() / key.length() >= enText.length()) {
 
                 } else {
-                    plainText = plainText + cipherText.charAt(newArrange[col] * cipherText.length() / key.length() + row % (cipherText.length() / key.length()));
+                    deText = deText + enText.charAt(newArrange[col] * enText.length() / key.length() + row % (enText.length() / key.length()));
                 }
             }
         }
-        return plainText;
+        return deText;
     }
 
+    @Override
     public byte[] encryptFile(byte[] fileArray, String key) {
-        byte[] byteCipher = new byte[fileArray.length];
+        byte[] enFile = new byte[key.length() * (1 + fileArray.length / key.length())];
         int[] arrange = getColArrange(key);
         int pos = 0;
         for (int row = 0; row < key.length(); row++) {
             for (int col = 0; col <= fileArray.length / key.length(); col++) {
                 if (col * key.length() + arrange[row] % key.length() >= fileArray.length) {
-
+                    pos++;
                 } else {
-                    byteCipher[pos++] = fileArray[col * key.length() + arrange[row] % key.length()];
+                    enFile[pos++] = fileArray[col * key.length() + arrange[row] % key.length()];
                 }
             }
         }
-        return byteCipher;
+        return enFile;
     }
 
+    @Override
     public byte[] decryptFile(byte[] fileArray, String key) {
-        byte[] byteFile = new byte[fileArray.length];
+        byte[] deFile = new byte[fileArray.length];
         int[] arrange = getColArrange(key);
         int[] newArrange = new int[arrange.length];
         for (int i = 0; i < arrange.length; i++) {
@@ -71,16 +73,18 @@ public class CesarCrypt implements Encryption {
         for (int row = 0; row < fileArray.length / key.length(); row++) {
             for (int col = 0; col < key.length(); col++) {
                 if (newArrange[col] * fileArray.length / key.length() + row % fileArray.length / key.length() >= fileArray.length) {
-
+                    pos++;
                 } else {
-                    byteFile[pos++] = fileArray[(newArrange[col] * fileArray.length / key.length() + row % (fileArray.length / key.length()))];
+                    deFile[pos++] = fileArray[(newArrange[col] * fileArray.length / key.length() + row % (fileArray.length / key.length()))];
                 }
             }
         }
-        return byteFile;
+
+        return deFile;
     }
 
     private int[] getColArrange(String key) {
+
         char[] keyArr = key.toLowerCase().toCharArray();
         int[] posArr = new int[keyArr.length];
         int rangForKey = keyArr.length - 1;

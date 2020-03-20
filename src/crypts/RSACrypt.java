@@ -4,7 +4,7 @@ import interfaces.Encryption;
 import java.util.Random;
 
 
-public class RSACrypt implements Encryption {
+public class RSACrypt  {
 
     private int P;
     private int Q;
@@ -13,7 +13,7 @@ public class RSACrypt implements Encryption {
     private long publicKey = 5;
     
 
-    @Override
+
     public String encrypt(String line, String key) {
         //generateKey();
         double temp;
@@ -26,7 +26,7 @@ public class RSACrypt implements Encryption {
         return cipherText;
     }
 
-    @Override
+
     public String decrypt(String line, String key) {
         double temp;
         String cipherText = "";

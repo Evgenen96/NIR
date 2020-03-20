@@ -3,23 +3,22 @@ package javaapplication2;
 import crypts.CesarCrypt;
 import crypts.CodewordCrypt;
 import crypts.CryptTypes;
-import static crypts.CryptTypes.CODEWORD;
 import crypts.GammaCrypt;
 import crypts.RSA2Crypt;
 import crypts.SimpleCrypt;
 import crypts.VernameCrypt;
+import interfaces.EncryptedText;
+import interfaces.Encryption;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
 public class Crypt {
@@ -31,6 +30,8 @@ public class Crypt {
     public RSA2Crypt rsaCrypt;
     public GammaCrypt gammaCrypt;
 
+    private int fileID = 12345;
+
     public Crypt() throws NoSuchAlgorithmException, NoSuchPaddingException {
         codewordCrypt = new CodewordCrypt();
         vernameCrypt = new VernameCrypt();
@@ -40,113 +41,74 @@ public class Crypt {
         gammaCrypt = new GammaCrypt();
     }
 
-    public byte[] encryptText(CryptTypes cryptType, String text, String key) throws UnsupportedEncodingException {
-        
-        byte[] bytePlainText = text.getBytes();
-        byte[] encryptedText = null;
+    public Encryption getCrypt(CryptTypes cryptType) {
+        Encryption toReturn = null;
         switch (cryptType) {
             case CODEWORD: {
-
+                toReturn = codewordCrypt;
                 break;
             }
             case SIMPLE: {
-                encryptedText = simpleCrypt.encryptFile(bytePlainText, key);
+                toReturn = simpleCrypt;
                 break;
             }
             case VERNAME: {
-                encryptedText = vernameCrypt.encryptFile(bytePlainText, key);
+                toReturn = vernameCrypt;
                 break;
             }
             case CESAR: {
-                encryptedText = cesarCrypt.encryptFile(bytePlainText, key);
+                toReturn = cesarCrypt;
                 break;
             }
             case RSA: {
-                try {
-                    encryptedText = rsaCrypt.encryptFile(bytePlainText);
-                    break;
-                } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException ex) {
-                    Logger.getLogger(Crypt.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-            case GAMMA: {
-                encryptedText = gammaCrypt.encryptFile(bytePlainText, key);
+                toReturn = rsaCrypt;
                 break;
             }
+            case GAMMA: {
+                toReturn = gammaCrypt;
+                break;
+            }
+            default:
+                throw new IllegalArgumentException("Wrong encryption type:" + cryptType);
         }
-        return encryptedText;
+        return toReturn;
     }
 
-    public String decryptText(CryptTypes cryptType, byte[] encryptedText, String key) throws UnsupportedEncodingException {
-        byte[] decryptedText = null;
-        switch (cryptType) {
-            case CODEWORD: {
+    public EncryptedText encryptText(CryptTypes cryptType, String text, String key) {
+        return this.getCrypt(cryptType).encrypt(text, key);
+    }
 
-                break;
-            }
-            case SIMPLE: {
-                decryptedText = simpleCrypt.decryptFile(encryptedText, key);
-                break;
-            }
-            case VERNAME: {
-                decryptedText = vernameCrypt.decryptFile(encryptedText, key);
-                break;
-            }
-            case CESAR: {
-                decryptedText = cesarCrypt.decryptFile(encryptedText, key);
-                break;
-            }
-            case RSA: {
-                try {
-                    decryptedText = rsaCrypt.decryptFile(encryptedText);
-                    break;
-                } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException | IOException ex) {
-                    Logger.getLogger(Crypt.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-            case GAMMA: {
-                decryptedText = gammaCrypt.decryptFile(encryptedText, key);
-                break;
-            }
-        }
-        return new String(decryptedText);
+    public String decryptText(CryptTypes cryptType, EncryptedText eText, String key) {
+        return this.getCrypt(cryptType).decrypt(eText, key);
     }
 
     public void encryptFile(CryptTypes cryptType, String fileName, String key) throws FileNotFoundException {
         try {
             byte[] fileArray = Files.readAllBytes(Paths.get(fileName));
             byte[] encryptedFile = null;
-            switch (cryptType) {
-                case CODEWORD: {
 
-                    break;
-                }
-                case SIMPLE: {
-                    encryptedFile = simpleCrypt.encryptFile(fileArray, key);
-                    break;
-                }
-                case VERNAME: {
-                    encryptedFile = vernameCrypt.encryptFile(fileArray, key);
-                    break;
-                }
-                case CESAR: {
-                    encryptedFile = cesarCrypt.encryptFile(fileArray, key);
-                    break;
-                }
-                case RSA: {
-                    encryptedFile = rsaCrypt.encryptFile(fileArray);
-                    break;
-                }
-                case GAMMA: {
-                    encryptedFile = gammaCrypt.encryptFile(fileArray, key);
-                    break;
-                }
+            encryptedFile = this.getCrypt(cryptType).encryptFile(fileArray, key);
+
+//            //индексирование файла
+//            String fileID = String.valueOf(this.fileID);
+//            byte[] byteFileID = fileID.getBytes();
+//            byte[] indexedEnFile = new byte[encryptedFile.length + byteFileID.length + 1];
+//            //первый байт - количество байтов на индекс
+//            indexedEnFile[0] = String.valueOf(byteFileID.length).getBytes()[0];
+//            //запись индекса
+//            for (int i = 1; i <= byteFileID.length; i++) {
+//                indexedEnFile[i] = byteFileID[i - 1];
+//            }
+//            int zeroPos = 0;
+//            //запись файла
+//            for (int i = byteFileID.length + 1; i < indexedEnFile.length; i++) {
+//                indexedEnFile[i] = encryptedFile[zeroPos++];
+//            }
+
+            try (FileOutputStream fos = new FileOutputStream(fileName)) {
+                fos.write(encryptedFile);
             }
-
-            FileOutputStream fos = new FileOutputStream(fileName);
-            fos.write(encryptedFile);
-            fos.close();
-        } catch (NoSuchAlgorithmException | InvalidKeyException | IllegalBlockSizeException | IOException | NoSuchPaddingException | BadPaddingException ex) {
+        } catch (IOException ex) {
             Logger.getLogger(Crypt.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
@@ -155,47 +117,18 @@ public class Crypt {
         try {
             byte[] fileArray = Files.readAllBytes(Paths.get(fileName));
             byte[] decryptedFile = null;
-            switch (cryptType) {
-                case CODEWORD: {
 
-                    break;
-                }
-                case SIMPLE: {
-                    decryptedFile = simpleCrypt.decryptFile(fileArray, key);
-                    break;
-                }
-                case VERNAME: {
-                    decryptedFile = vernameCrypt.decryptFile(fileArray, key);
-                    break;
-                }
-                case CESAR: {
-                    decryptedFile = cesarCrypt.decryptFile(fileArray, key);
-                    break;
-                }
-                case RSA: {
-                    decryptedFile = rsaCrypt.decryptFile(fileArray);
-                    break;
-                }
-                case GAMMA: {
-                    decryptedFile = gammaCrypt.decryptFile(fileArray, key);
-                    break;
-                }
-            }
+//            //извлечение индекса
+//            int IDLength = Integer.valueOf(new String(new byte[]{fileArray[0]}));
+//            int fileID = Integer.valueOf(new String(Arrays.copyOfRange(fileArray, 1, IDLength + 1)));
+//            byte[] clearFileArray = Arrays.copyOfRange(fileArray, IDLength + 1, fileArray.length);
+
+            decryptedFile = this.getCrypt(cryptType).decryptFile(fileArray, key);
 
             FileOutputStream fos = new FileOutputStream(fileName);
             fos.write(decryptedFile);
             fos.close();
-        } catch (NoSuchAlgorithmException ex) {
-            Logger.getLogger(Crypt.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InvalidKeyException ex) {
-            Logger.getLogger(Crypt.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IllegalBlockSizeException ex) {
-            Logger.getLogger(Crypt.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
-            Logger.getLogger(Crypt.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (NoSuchPaddingException ex) {
-            Logger.getLogger(Crypt.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (BadPaddingException ex) {
             Logger.getLogger(Crypt.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
