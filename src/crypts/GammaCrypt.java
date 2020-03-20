@@ -5,6 +5,8 @@ import interfaces.Encryption;
 
 public class GammaCrypt implements Encryption{
 
+    private final CryptTypes CRYPTID = CryptTypes.GAMMA;
+    
     @Override
     public EncryptedText encrypt(String plainText, String key) {
         EncryptedText eText = new EncryptedText();
@@ -48,6 +50,11 @@ public class GammaCrypt implements Encryption{
         }
         return byteFile;
     }
+    
+    @Override
+    public CryptTypes getCryptID() {
+        return CRYPTID;
+    }
 
 }
 //реализцаия генератора псевдослучайных чисел методом Лемера
@@ -76,4 +83,6 @@ class RandomLemer {
     public int nextInt(int bound) {
         return (int) (nextDouble() * bound);
     }
+    
+    
 }

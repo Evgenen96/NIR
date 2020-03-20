@@ -5,6 +5,9 @@ import interfaces.Encryption;
 
 public class SimpleCrypt implements Encryption {
 
+    
+    private final CryptTypes CRYPTID = CryptTypes.SIMPLE;
+    
     @Override
     public EncryptedText encrypt(String plainText, String key) {
         EncryptedText eText = new EncryptedText();
@@ -114,5 +117,10 @@ public class SimpleCrypt implements Encryption {
         }
 
         return byteFile;
+    }
+    
+    @Override
+    public CryptTypes getCryptID() {
+        return CRYPTID;
     }
 }

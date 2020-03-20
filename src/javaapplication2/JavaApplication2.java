@@ -14,11 +14,10 @@ public class JavaApplication2 {
     public static void main(String[] args) {
         try {
             Crypt c = new Crypt();
-            c.encryptFile(CryptTypes.CESAR, "src/res/ab.jpg", "thysaa");
-            c.decryptFile(CryptTypes.CESAR, "src/res/ab.jpg", "thysaa");
+            c.encryptFile(CryptTypes.CESAR, "src/res/ab.jpg", "thysaa", true);
+            c.decryptFile(null, "src/res/ab.jpg", "thddysaa");
             EncryptedText s = c.encryptText(CryptTypes.CESAR, "sssss", "bomba");
             String d  = c.decryptText(CryptTypes.CESAR, s, "bomba");
-            System.out.println(d);
             
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | FileNotFoundException ex) {
             Logger.getLogger(JavaApplication2.class.getName()).log(Level.SEVERE, null, ex);

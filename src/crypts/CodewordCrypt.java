@@ -7,7 +7,8 @@ import javaapplication2.MyAlphabet;
 public class CodewordCrypt implements Encryption{
 
     private MyAlphabet a; //английский исходный алфавит
-
+    private final CryptTypes CRYPTID = CryptTypes.CODEWORD; 
+    
     public CodewordCrypt() {
         a = new MyAlphabet();
     }
@@ -47,5 +48,12 @@ public class CodewordCrypt implements Encryption{
     public byte[] decryptFile(byte[] fileArray, String key) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+
+    @Override
+    public CryptTypes getCryptID() {
+        return CRYPTID;
+    }
+    
+    
 
 }

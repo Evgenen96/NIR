@@ -5,6 +5,8 @@ import interfaces.Encryption;
 
 public class CesarCrypt implements Encryption {
 
+    private final CryptTypes CRYPTID = CryptTypes.CESAR;
+    
     @Override
     public EncryptedText encrypt(String plainText, String key) {
         EncryptedText eText = new EncryptedText();
@@ -105,5 +107,10 @@ public class CesarCrypt implements Encryption {
             newPosArr[posArr[i]] = i;
         }
         return newPosArr;
+    }
+
+    @Override
+    public CryptTypes getCryptID() {
+        return CRYPTID;
     }
 }

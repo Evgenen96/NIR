@@ -25,6 +25,8 @@ public class RSA2Crypt implements Encryption{
     private KeyGenerator generator;
     private SecretKey secKey;
     private byte[] encryptedKey;
+    
+    private final CryptTypes CRYPTID = CryptTypes.RSA;
 
     public RSA2Crypt() throws NoSuchAlgorithmException, NoSuchPaddingException {
         keyPairGenerator = KeyPairGenerator.getInstance("RSA");
@@ -113,5 +115,10 @@ public class RSA2Crypt implements Encryption{
             Logger.getLogger(RSA2Crypt.class.getName()).log(Level.SEVERE, null, ex);
         }
         return null;
+    }
+    
+    @Override
+    public CryptTypes getCryptID() {
+        return CRYPTID;
     }
 }

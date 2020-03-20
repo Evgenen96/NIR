@@ -5,6 +5,8 @@ import interfaces.Encryption;
 
 public class VernameCrypt implements Encryption {
 
+    private final CryptTypes CRYPTID = CryptTypes.VERNAME;
+
     @Override
     public EncryptedText encrypt(String plainText, String key) {
         EncryptedText eText = new EncryptedText();
@@ -47,6 +49,11 @@ public class VernameCrypt implements Encryption {
             byteFile[i] = (byte) (fileArray[i] ^ byteKey[i % key.length()]);
         }
         return byteFile;
+    }
+
+    @Override
+    public CryptTypes getCryptID() {
+        return CRYPTID;
     }
 
 }
