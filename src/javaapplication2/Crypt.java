@@ -33,7 +33,10 @@ public class Crypt {
     public GammaCrypt gammaCrypt;
 
     private int fileID = 12345;
+    private String mark = "ciphered";
+    private byte[] byteMark;
     private String secretFilePath = "src/res/pas.txt";
+    private String secretKey = "2";
 
     public Crypt() throws NoSuchAlgorithmException, NoSuchPaddingException {
         codewordCrypt = new CodewordCrypt();
@@ -42,6 +45,7 @@ public class Crypt {
         cesarCrypt = new CesarCrypt();
         rsaCrypt = new RSA2Crypt();
         gammaCrypt = new GammaCrypt();
+        byteMark = mark.getBytes();
     }
 
     public Encryption getCrypt(CryptTypes cryptType) {
@@ -89,19 +93,22 @@ public class Crypt {
         try {
             byte[] fileArray = Files.readAllBytes(Paths.get(fileName));
             byte[] encryptedFile;
-            System.out.println(fileArray.length);
 
             //шифрование
             encryptedFile = this.getCrypt(cryptType).encryptFile(fileArray, key);
-            System.out.println(encryptedFile.length);
+            CryptMark cMark = new CryptMark();
 
             //сохранить информацию о шифровании
-            if (saveEncryption) {           
-                encryptedFile = saveKeyForFile(encryptedFile, key, cryptType);
+            if (saveEncryption) {
+                cMark.setFileID(fileID++);
             }
+
+            //добавление метки, что файл зашифрован
+            byte[] markedEnFile = cMark.getByteMark(encryptedFile);
+
             //запись
             try (FileOutputStream fos = new FileOutputStream(fileName)) {
-                fos.write(encryptedFile);
+                fos.write(markedEnFile);
             }
         } catch (IOException ex) {
             Logger.getLogger(Crypt.class.getName()).log(Level.SEVERE, null, ex);
@@ -111,30 +118,33 @@ public class Crypt {
     public void decryptFile(CryptTypes cryptType, String fileName, String key) throws FileNotFoundException {
         try {
             byte[] fileArray = Files.readAllBytes(Paths.get(fileName));
-            byte[] decryptedFile = null;
+            byte[] decryptedFile;
+            CryptMark cMark = new CryptMark();
 
-            if (cryptType == null) {
-                //извлечение индекса
-                int IDLength = Integer.valueOf(new String(new byte[]{fileArray[0]}));
-                int fileID = Integer.valueOf(new String(Arrays.copyOfRange(fileArray, 1, IDLength + 1)));
-                String[] idLine = extractKey(fileID);
+            //проверка метки
+            if (cMark.readMark(fileArray)) {
+                fileArray = Arrays.copyOfRange(fileArray, cMark.getMarkLength() + 10, fileArray.length);
+            } else {
+                System.out.println("Файл не был зашифрован");
+                return;
+            }
+
+            //извлечение индекса если есть
+            if (cMark.getFileID() != -1000) {
+                String[] idLine = extractKey(cMark.getFileID());
+                System.out.println(idLine[2]);
                 if (idLine == null) {
                     System.out.println("Ключ к файлу не найден");
                     return;
                 } else {
                     cryptType = CryptTypes.valueOf(idLine[1]);
-                    key = idLine[2];
-                    byte[] clearFileArray = Arrays.copyOfRange(fileArray, IDLength + 1, fileArray.length);
-                    System.out.println(fileArray.length);
-                    fileArray = Arrays.copyOf(clearFileArray, clearFileArray.length);
-                    System.out.println(fileArray.length);
-                    System.out.println(clearFileArray.length);
-                    System.out.println("");
+                    key = vernameCrypt.decrypt(new EncryptedText(idLine[2]), secretKey);
                 }
-
             }
+            //расшифровка
             decryptedFile = this.getCrypt(cryptType).decryptFile(fileArray, key);
 
+            //запись
             FileOutputStream fos = new FileOutputStream(fileName);
             fos.write(decryptedFile);
             fos.close();
@@ -164,7 +174,8 @@ public class Crypt {
         try {
             FileWriter fos;
             fos = new FileWriter(secretFilePath, true);
-            fos.write(this.fileID + ";;;" + this.getCrypt(crypt).getCryptID() + ";;;" + key + "\n");
+            fos.write("\n" + this.fileID + ";;;" + this.getCrypt(crypt).getCryptID()
+                    + ";;;" + new String(vernameCrypt.encrypt(key, secretKey).getByteText()));
             fos.close();
         } catch (FileNotFoundException ex) {
             Logger.getLogger(Crypt.class.getName()).log(Level.SEVERE, null, ex);

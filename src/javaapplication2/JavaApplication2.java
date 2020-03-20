@@ -14,8 +14,8 @@ public class JavaApplication2 {
     public static void main(String[] args) {
         try {
             Crypt c = new Crypt();
-            c.encryptFile(CryptTypes.CESAR, "src/res/ab.jpg", "thysaa", true);
-            c.decryptFile(null, "src/res/ab.jpg", "thddysaa");
+            c.encryptFile(CryptTypes.CESAR, "src/res/ab.jpg", "thysaa", false);
+            c.decryptFile(CryptTypes.CESAR, "src/res/ab.jpg", "thysaa");
             EncryptedText s = c.encryptText(CryptTypes.CESAR, "sssss", "bomba");
             String d  = c.decryptText(CryptTypes.CESAR, s, "bomba");
             
