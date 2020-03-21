@@ -9,11 +9,8 @@ import crypts.SimpleCrypt;
 import crypts.VernameCrypt;
 import interfaces.EncryptedText;
 import interfaces.Encryption;
-import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -25,18 +22,13 @@ import javax.crypto.NoSuchPaddingException;
 
 public class Crypt {
 
+    //шифры
     public CodewordCrypt codewordCrypt;
     public VernameCrypt vernameCrypt;
     public SimpleCrypt simpleCrypt;
     public CesarCrypt cesarCrypt;
     public RSA2Crypt rsaCrypt;
     public GammaCrypt gammaCrypt;
-
-    private int fileID = 12345;
-    private String mark = "ciphered";
-    private byte[] byteMark;
-    private String secretFilePath = "src/res/pas.txt";
-    private String secretKey = "2";
 
     public Crypt() throws NoSuchAlgorithmException, NoSuchPaddingException {
         codewordCrypt = new CodewordCrypt();
@@ -45,7 +37,6 @@ public class Crypt {
         cesarCrypt = new CesarCrypt();
         rsaCrypt = new RSA2Crypt();
         gammaCrypt = new GammaCrypt();
-        byteMark = mark.getBytes();
     }
 
     public Encryption getCrypt(CryptTypes cryptType) {
@@ -96,17 +87,17 @@ public class Crypt {
 
             //шифрование
             encryptedFile = this.getCrypt(cryptType).encryptFile(fileArray, key);
-            CryptMark cMark = new CryptMark();
 
-            //сохранить информацию о шифровании
+            //добавление метки, что файл зашифрован 
+            FileMeta cMark = new FileMeta(saveEncryption);
+            byte[] markedEnFile = cMark.addMark(encryptedFile);
+
+            //сохранения шифрования в секретный файл
             if (saveEncryption) {
-                cMark.setFileID(fileID++);
+                cMark.saveSecretKey(cryptType, key);
             }
 
-            //добавление метки, что файл зашифрован
-            byte[] markedEnFile = cMark.getByteMark(encryptedFile);
-
-            //запись
+            //запись в файл
             try (FileOutputStream fos = new FileOutputStream(fileName)) {
                 fos.write(markedEnFile);
             }
@@ -119,9 +110,9 @@ public class Crypt {
         try {
             byte[] fileArray = Files.readAllBytes(Paths.get(fileName));
             byte[] decryptedFile;
-            CryptMark cMark = new CryptMark();
 
-            //проверка метки
+            //проверка наличия метки метки
+            FileMeta cMark = new FileMeta();
             if (cMark.readMark(fileArray)) {
                 fileArray = Arrays.copyOfRange(fileArray, cMark.getMarkLength() + 10, fileArray.length);
             } else {
@@ -130,15 +121,14 @@ public class Crypt {
             }
 
             //извлечение индекса если есть
-            if (cMark.getFileID() != -1000) {
-                String[] idLine = extractKey(cMark.getFileID());
-                System.out.println(idLine[2]);
-                if (idLine == null) {
+            if (cMark.isCipherSave()) {
+                String[] idLine = cMark.extractSecretKey();
+                if (idLine != null) {
+                    cryptType = CryptTypes.valueOf(idLine[1]);
+                    key = idLine[2];
+                } else {
                     System.out.println("Ключ к файлу не найден");
                     return;
-                } else {
-                    cryptType = CryptTypes.valueOf(idLine[1]);
-                    key = vernameCrypt.decrypt(new EncryptedText(idLine[2]), secretKey);
                 }
             }
             //расшифровка
@@ -151,60 +141,5 @@ public class Crypt {
         } catch (IOException ex) {
             Logger.getLogger(Crypt.class.getName()).log(Level.SEVERE, null, ex);
         }
-    }
-
-    public byte[] saveKeyForFile(byte[] byteFile, String key, CryptTypes crypt) {
-        //индексирование файла
-        String fileID = String.valueOf(this.fileID);
-        byte[] byteFileID = fileID.getBytes();
-        byte[] indexedEnFile = new byte[byteFile.length + byteFileID.length + 1];
-        //первый байт - количество байтов на индекс
-        indexedEnFile[0] = String.valueOf(byteFileID.length).getBytes()[0];
-        //запись индекса
-        for (int i = 1; i <= byteFileID.length; i++) {
-            indexedEnFile[i] = byteFileID[i - 1];
-        }
-        int zeroPos = 0;
-        //запись файла
-        for (int i = byteFileID.length + 1; i < indexedEnFile.length; i++) {
-            indexedEnFile[i] = byteFile[zeroPos++];
-        }
-
-        //сохранения ключа шифрования в секретный файл
-        try {
-            FileWriter fos;
-            fos = new FileWriter(secretFilePath, true);
-            fos.write("\n" + this.fileID + ";;;" + this.getCrypt(crypt).getCryptID()
-                    + ";;;" + new String(vernameCrypt.encrypt(key, secretKey).getByteText()));
-            fos.close();
-        } catch (FileNotFoundException ex) {
-            Logger.getLogger(Crypt.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(Crypt.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        this.fileID++;
-        return indexedEnFile;
-    }
-
-    public String[] extractKey(int fileID) {
-        try {
-            int idLength = String.valueOf(fileID).length();
-            BufferedReader br = new BufferedReader(new FileReader(secretFilePath));
-            String line = br.readLine();
-            while (line != null) {
-                if (line.substring(0, idLength).equals(String.valueOf(fileID))) {
-                    break;
-                }
-                line = br.readLine();
-            }
-            br.close();
-            return line.split(";;;");
-
-        } catch (FileNotFoundException ex) {
-            Logger.getLogger(Crypt.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(Crypt.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return null;
     }
 }

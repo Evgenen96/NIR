@@ -3,14 +3,14 @@ package crypts;
 import interfaces.EncryptedText;
 import interfaces.Encryption;
 
-public class GammaCrypt implements Encryption{
+public class GammaCrypt implements Encryption {
 
     private final CryptTypes CRYPTID = CryptTypes.GAMMA;
-    
+
     @Override
     public EncryptedText encrypt(String plainText, String key) {
         EncryptedText eText = new EncryptedText();
-        RandomLemer R = new RandomLemer(Integer.valueOf(key));
+        RandomLemer R = new RandomLemer(transfromKey(key));
         byte[] arr = plainText.getBytes();
         byte[] enText = new byte[arr.length];
         for (int i = 0; i < arr.length; i++) {
@@ -23,7 +23,7 @@ public class GammaCrypt implements Encryption{
     @Override
     public String decrypt(EncryptedText eText, String key) {
         byte[] enText = eText.getByteText();
-        RandomLemer R = new RandomLemer(Integer.valueOf(key));
+        RandomLemer R = new RandomLemer(transfromKey(key));
         byte[] deText = new byte[enText.length];
         for (int i = 0; i < enText.length; i++) {
             deText[i] = (byte) (enText[i] ^ R.next());
@@ -33,7 +33,7 @@ public class GammaCrypt implements Encryption{
 
     @Override
     public byte[] encryptFile(byte[] fileArray, String key) {
-        RandomLemer R = new RandomLemer(Integer.valueOf(key));
+        RandomLemer R = new RandomLemer(transfromKey(key));
         byte[] byteCipher = new byte[fileArray.length];
         for (int i = 0; i < fileArray.length; i++) {
             byteCipher[i] = (byte) (fileArray[i] ^ R.next());
@@ -43,17 +43,35 @@ public class GammaCrypt implements Encryption{
 
     @Override
     public byte[] decryptFile(byte[] fileArray, String key) {
-        RandomLemer R = new RandomLemer(Integer.valueOf(key));
+        RandomLemer R = new RandomLemer(transfromKey(key));
         byte[] byteFile = new byte[fileArray.length];
         for (int i = 0; i < fileArray.length; i++) {
             byteFile[i] = (byte) (fileArray[i] ^ R.next());
         }
         return byteFile;
     }
-    
+
     @Override
     public CryptTypes getCryptID() {
         return CRYPTID;
+    }
+
+    @Override
+    public boolean isKeyCorrect(String key) {
+        return true;
+    }
+    
+    public int transfromKey(String key){
+        int intKey;
+        try {
+            intKey = Integer.valueOf(key);
+        } catch (NumberFormatException e) {
+            intKey = 0;
+            for (int i = 0; i < key.length(); i++) {
+                intKey += Math.abs((int)key.charAt(i));
+            }
+        }
+        return intKey;
     }
 
 }
@@ -83,6 +101,5 @@ class RandomLemer {
     public int nextInt(int bound) {
         return (int) (nextDouble() * bound);
     }
-    
-    
+
 }

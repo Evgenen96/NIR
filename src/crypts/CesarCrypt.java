@@ -11,7 +11,7 @@ public class CesarCrypt implements Encryption {
     public EncryptedText encrypt(String plainText, String key) {
         EncryptedText eText = new EncryptedText();
         String enText = "";
-        int[] arrange = getColArrange(key);
+        int[] arrange = transfromKey(key);
         for (int row = 0; row < key.length(); row++) {
             for (int col = 0; col <= plainText.length() / key.length(); col++) {
                 if (col * key.length() + arrange[row] % key.length() >= plainText.length()) {
@@ -29,7 +29,7 @@ public class CesarCrypt implements Encryption {
     public String decrypt(EncryptedText eText, String key) {
         String deText = "";
         String enText = eText.getText();
-        int[] arrange = getColArrange(key);
+        int[] arrange = transfromKey(key);
         int[] newArrange = new int[arrange.length];
         for (int i = 0; i < arrange.length; i++) {
             newArrange[arrange[i]] = i;
@@ -49,7 +49,7 @@ public class CesarCrypt implements Encryption {
     @Override
     public byte[] encryptFile(byte[] fileArray, String key) {
         byte[] enFile = new byte[key.length() * (1 + fileArray.length / key.length())];
-        int[] arrange = getColArrange(key);
+        int[] arrange = transfromKey(key);
         int pos = 0;
         for (int row = 0; row < key.length(); row++) {
             for (int col = 0; col <= fileArray.length / key.length(); col++) {
@@ -66,7 +66,7 @@ public class CesarCrypt implements Encryption {
     @Override
     public byte[] decryptFile(byte[] fileArray, String key) {
         byte[] deFile = new byte[fileArray.length];
-        int[] arrange = getColArrange(key);
+        int[] arrange = transfromKey(key);
         int[] newArrange = new int[arrange.length];
         for (int i = 0; i < arrange.length; i++) {
             newArrange[arrange[i]] = i;
@@ -85,7 +85,7 @@ public class CesarCrypt implements Encryption {
         return deFile;
     }
 
-    private int[] getColArrange(String key) {
+    private int[] transfromKey(String key) {
 
         char[] keyArr = key.toLowerCase().toCharArray();
         int[] posArr = new int[keyArr.length];
@@ -99,7 +99,7 @@ public class CesarCrypt implements Encryption {
                     maxPos = i;
                 }
             }
-            keyArr[maxPos] = (char) (0);
+            keyArr[maxPos] = (char) (' ');
             posArr[maxPos] = rangForKey--;
         }
         int[] newPosArr = new int[posArr.length];
@@ -112,5 +112,10 @@ public class CesarCrypt implements Encryption {
     @Override
     public CryptTypes getCryptID() {
         return CRYPTID;
+    }
+    
+      @Override
+    public boolean isKeyCorrect(String key) {
+        return true;
     }
 }

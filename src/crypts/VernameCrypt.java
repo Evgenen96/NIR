@@ -56,4 +56,9 @@ public class VernameCrypt implements Encryption {
         return CRYPTID;
     }
 
+    @Override
+    public boolean isKeyCorrect(String key) {
+        return true;
+    }
+
 }

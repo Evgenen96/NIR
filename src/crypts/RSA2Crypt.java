@@ -18,14 +18,14 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
-public class RSA2Crypt implements Encryption{
+public class RSA2Crypt implements Encryption {
 
     private KeyPair keyPair;
     private KeyPairGenerator keyPairGenerator;
     private KeyGenerator generator;
     private SecretKey secKey;
     private byte[] encryptedKey;
-    
+
     private final CryptTypes CRYPTID = CryptTypes.RSA;
 
     public RSA2Crypt() throws NoSuchAlgorithmException, NoSuchPaddingException {
@@ -51,7 +51,7 @@ public class RSA2Crypt implements Encryption{
     }
 
     @Override
-    public String decrypt(EncryptedText eText, String key)  {
+    public String decrypt(EncryptedText eText, String key) {
         try {
             byte[] enText = eText.getByteText();
             Cipher decryptCipher = Cipher.getInstance("RSA");
@@ -65,20 +65,20 @@ public class RSA2Crypt implements Encryption{
     }
 
     @Override
-    public byte[] encryptFile(byte[] fileArray, String key)  {
+    public byte[] encryptFile(byte[] fileArray, String key) {
 
         try {
             //генерация симметричного ключа
             secKey = generator.generateKey();
-            
+
             //шифрование файла
             Cipher aesCipher = Cipher.getInstance("AES");
             aesCipher.init(Cipher.ENCRYPT_MODE, secKey);
             byte[] byteCipher = aesCipher.doFinal(fileArray);
-            
+
             //генерация ключевой пары
             keyPair = keyPairGenerator.generateKeyPair();
-            
+
             //шифрование ключа
             Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
             cipher.init(Cipher.PUBLIC_KEY, keyPair.getPublic());
@@ -86,7 +86,7 @@ public class RSA2Crypt implements Encryption{
             for (int i = 0; i < encryptedKey.length; i++) {
                 System.out.print(encryptedKey[i] + " ");
             }
-            
+
             //передача ключа
             this.encryptedKey = encryptedKey;
             return byteCipher;
@@ -97,7 +97,7 @@ public class RSA2Crypt implements Encryption{
     }
 
     @Override
-    public byte[] decryptFile(byte[] fileArray, String key)  {
+    public byte[] decryptFile(byte[] fileArray, String key) {
 
         try {
             //расшифровка ключа
@@ -105,7 +105,7 @@ public class RSA2Crypt implements Encryption{
             cipher.init(Cipher.PRIVATE_KEY, keyPair.getPrivate());
             byte[] decryptedKey = cipher.doFinal(encryptedKey);
             SecretKey originalKey = new SecretKeySpec(decryptedKey, 0, decryptedKey.length, "AES");
-            
+
             //расшифровка файла
             Cipher aesCipher = Cipher.getInstance("AES");
             aesCipher.init(Cipher.DECRYPT_MODE, originalKey);
@@ -116,9 +116,14 @@ public class RSA2Crypt implements Encryption{
         }
         return null;
     }
-    
+
     @Override
     public CryptTypes getCryptID() {
         return CRYPTID;
+    }
+
+    @Override
+    public boolean isKeyCorrect(String key) {
+        return true;
     }
 }

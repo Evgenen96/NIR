@@ -5,21 +5,14 @@ import interfaces.Encryption;
 
 public class SimpleCrypt implements Encryption {
 
-    
     private final CryptTypes CRYPTID = CryptTypes.SIMPLE;
-    
+
     @Override
     public EncryptedText encrypt(String plainText, String key) {
+
         EncryptedText eText = new EncryptedText();
         String enText = "";
-        String temp = "";
-        int[] keyArr = new int[key.length()];
-
-        for (int i = 0; i < keyArr.length; i++) {
-            temp += key.charAt(i);
-            keyArr[i] = Integer.valueOf(temp) - 1;
-            temp = "";
-        }
+        int[] keyArr = transformKey(key);
 
         for (int blockNumber = 0; blockNumber <= (plainText.length() / key.length()); blockNumber++) {
             for (int offset = 0; offset < key.length(); offset++) {
@@ -38,14 +31,7 @@ public class SimpleCrypt implements Encryption {
     public String decrypt(EncryptedText eText, String key) {
         String enText = eText.getText();
         String deText;
-        String temp = "";
-        int[] keyArr = new int[key.length()];
-
-        for (int i = 0; i < keyArr.length; i++) {
-            temp += key.charAt(i);
-            keyArr[i] = Integer.valueOf(temp) - 1;
-            temp = "";
-        }
+        int[] keyArr = transformKey(key);
 
         char[] newLineArr = new char[enText.length()];
         int lastBlockFix = 0; //когда неидеальные блоки
@@ -69,14 +55,7 @@ public class SimpleCrypt implements Encryption {
     public byte[] encryptFile(byte[] fileArray, String key) {
 
         byte[] byteCipher = new byte[fileArray.length];
-        String temp = "";
-        int[] keyArr = new int[key.length()];
-
-        for (int i = 0; i < keyArr.length; i++) {
-            temp += key.charAt(i);
-            keyArr[i] = Integer.valueOf(temp) - 1;
-            temp = "";
-        }
+        int[] keyArr = transformKey(key);
 
         int pos = 0;
         for (int blockNumber = 0; blockNumber <= (fileArray.length / key.length()); blockNumber++) {
@@ -93,14 +72,7 @@ public class SimpleCrypt implements Encryption {
     @Override
     public byte[] decryptFile(byte[] fileArray, String key) {
         byte[] byteFile = new byte[fileArray.length];
-        String temp = "";
-        int[] keyArr = new int[key.length()];
-
-        for (int i = 0; i < keyArr.length; i++) {
-            temp += key.charAt(i);
-            keyArr[i] = Integer.valueOf(temp) - 1;
-            temp = "";
-        }
+        int[] keyArr = transformKey(key);
 
         int lastBlockFix = 0; //когда неидеальные блоки
         for (int blockNumber = 0; blockNumber <= (fileArray.length / key.length()); blockNumber++) {
@@ -118,9 +90,33 @@ public class SimpleCrypt implements Encryption {
 
         return byteFile;
     }
-    
+
+    private int[] transformKey(String key) {
+        char[] keyArr = key.toLowerCase().toCharArray();
+        int[] posArr = new int[keyArr.length];
+        int rangForKey = keyArr.length - 1;
+        while (rangForKey >= 0) {
+            int max = -1;
+            int maxPos = -1;
+            for (int i = 0; i < keyArr.length; i++) {
+                if (max <= (int) keyArr[i]) {
+                    max = keyArr[i];
+                    maxPos = i;
+                }
+            }
+            keyArr[maxPos] = ' ';
+            posArr[maxPos] = rangForKey--;
+        }
+        return posArr;
+    }
+
     @Override
     public CryptTypes getCryptID() {
         return CRYPTID;
+    }
+
+    @Override
+    public boolean isKeyCorrect(String key) {
+        return true;
     }
 }

@@ -54,6 +54,11 @@ public class CodewordCrypt implements Encryption{
         return CRYPTID;
     }
     
+      @Override
+    public boolean isKeyCorrect(String key) {
+        return true;
+    }
+    
     
 
 }

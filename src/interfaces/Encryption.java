@@ -13,4 +13,6 @@ public interface Encryption {
     public byte[] decryptFile(byte[] fileArray, String key);
     
     public CryptTypes getCryptID();
+    
+    public boolean isKeyCorrect(String key);
 }
