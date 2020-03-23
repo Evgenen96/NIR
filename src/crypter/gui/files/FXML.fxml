@@ -15,7 +15,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="javaapplication2.CryptFXMLController">
+<BorderPane prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="crypter.gui.files.CryptFXMLController">
    <center>
       <HBox prefHeight="465.0" prefWidth="800.0" BorderPane.alignment="CENTER">
          <children>
@@ -42,7 +42,7 @@
                               </ImageView>
                            </graphic>
                         </Button>
-                        <TextField fx:id="textFileInfo" prefHeight="25.0" prefWidth="300.0" />
+                        <TextField fx:id="textFileInfo" editable="false" prefHeight="25.0" prefWidth="300.0" />
                      </items>
                   </ToolBar>
                </children>
@@ -88,7 +88,7 @@
                               </ImageView>
                            </graphic>
                         </Button>
-                        <Button fx:id="btRemoveAll" mnemonicParsing="false">
+                        <Button fx:id="btRemoveAll" mnemonicParsing="false" onAction="#btRemoveAllAction">
                            <graphic>
                               <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
@@ -97,7 +97,7 @@
                               </ImageView>
                            </graphic>
                         </Button>
-                        <TextField fx:id="textSelFileInfo" prefHeight="25.0" prefWidth="250.0" />
+                        <TextField fx:id="textSelFileInfo" editable="false" prefHeight="25.0" prefWidth="250.0" />
                      </items>
                   </ToolBar>
                </children>
@@ -133,12 +133,12 @@
                         <Insets left="5.0" right="5.0" />
                      </HBox.margin>
                   </ChoiceBox>
-                  <Button fx:id="btEncryptFile" alignment="CENTER_RIGHT" mnemonicParsing="false" text="Зашифровать">
+                  <Button fx:id="btEncryptFile" alignment="CENTER_RIGHT" mnemonicParsing="false" onAction="#btEncryptFileAction" text="Зашифровать">
                      <HBox.margin>
                         <Insets left="5.0" right="5.0" />
                      </HBox.margin>
                   </Button>
-                  <Button fx:id="btDecryptFile" alignment="CENTER_RIGHT" mnemonicParsing="false" text="Расшифровать">
+                  <Button fx:id="btDecryptFile" alignment="CENTER_RIGHT" mnemonicParsing="false" onAction="#btDecryptFileAction" text="Расшифровать">
                      <HBox.margin>
                         <Insets left="5.0" right="5.0" />
                      </HBox.margin>
