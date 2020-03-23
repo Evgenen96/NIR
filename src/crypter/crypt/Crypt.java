@@ -9,7 +9,7 @@ import crypter.crypt.ciphers.SimpleCrypt;
 import crypter.crypt.ciphers.VernameCrypt;
 import crypter.crypt.helpers.EncryptedText;
 import crypter.crypt.helpers.Encryption;
-import java.io.FileNotFoundException;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -86,7 +86,7 @@ public class Crypt {
         return this.getCrypt(cryptType).decrypt(eText, key);
     }
 
-    public boolean encryptFile(CryptTypes cryptType, String fileName, String key, boolean saveEncryption) {
+    public File encryptFile(CryptTypes cryptType, String fileName, String key, boolean saveEncryption) {
         try {
             byte[] fileArray = Files.readAllBytes(Paths.get(fileName));
             byte[] encryptedFile;
@@ -96,7 +96,7 @@ public class Crypt {
 
             //добавление метки, что файл зашифрован 
             FileMeta cMark = new FileMeta(saveEncryption);
-            byte[] markedEnFile = cMark.addMark(encryptedFile);
+            byte[] markedEnFile = cMark.addMark(encryptedFile, fileName);
 
             //сохранения шифрования в секретный файл
             if (saveEncryption) {
@@ -107,14 +107,17 @@ public class Crypt {
             try (FileOutputStream fos = new FileOutputStream(fileName)) {
                 fos.write(markedEnFile);
             }
+            File enFile = new File(cMark.changeExtension(fileName));
+            System.out.println(fileName + " был зашифрован методом " + cryptType.getName());
+            return enFile;
         } catch (IOException ex) {
             System.out.println("Ошибка при записи в файл " + fileName);
-            return false;
+            return null;
         }
-        return true;
+
     }
 
-    public boolean decryptFile(CryptTypes cryptType, String fileName, String key) {
+    public File decryptFile(CryptTypes cryptType, String fileName, String key) {
         try {
             byte[] fileArray = Files.readAllBytes(Paths.get(fileName));
             byte[] decryptedFile;
@@ -124,8 +127,8 @@ public class Crypt {
             if (cMark.readMark(fileArray)) {
                 fileArray = Arrays.copyOfRange(fileArray, cMark.getMarkLength() + 10, fileArray.length);
             } else {
-                System.out.println("Файл не был зашифрован");
-                return false;
+                System.out.println("Файл не был расшифрован");
+                return null;
             }
 
             //извлечение индекса если есть
@@ -136,7 +139,7 @@ public class Crypt {
                     key = idLine[2];
                 } else {
                     System.out.println("Ключ к файлу не найден");
-                    return false;
+                    return null;
                 }
             }
             //расшифровка
@@ -146,9 +149,15 @@ public class Crypt {
             FileOutputStream fos = new FileOutputStream(fileName);
             fos.write(decryptedFile);
             fos.close();
+
+            File deFile = new File(cMark.changeExtension(fileName));
+            System.out.println(fileName + " был расшифрован методом " + cryptType.getName());
+            return deFile;
+
         } catch (IOException ex) {
-            return false;
+            System.out.println("Ошибка при расшифровки файла");
+            return null;
         }
-        return true;
+
     }
 }

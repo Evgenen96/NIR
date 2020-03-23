@@ -5,6 +5,7 @@ import crypter.crypt.helpers.CryptTypes;
 import crypter.gui.alert.AlertStage;
 import crypter.gui.files.CryptFXMLController;
 import crypter.gui.files.helpers.MyFile;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
@@ -44,13 +45,14 @@ public class DecryptSettingsFXMLController implements Initializable {
         CryptTypes type = CryptFXMLController.getType();
         for (String filePath : CryptFXMLController.getFileToEncryptPath()) {
             MyFile file = (MyFile) CryptFXMLController.getFilesTab().getItems().get(i++);
-            if (CryptFXMLController.getCryptSystem().decryptFile(type, filePath, passField1.getText())) {
-                file.setStatus("dec");
-                CryptFXMLController.getFilesTab().refresh();
-            } else {
-                file.setStatus("err");
-                CryptFXMLController.getFilesTab().refresh();
-            }
+            File tempFile = CryptFXMLController.getCryptSystem().decryptFile(type, filePath, passField1.getText());
+                if (tempFile != null) {
+                    file.setStatus("dec", tempFile);
+                    CryptFXMLController.getFilesTab().refresh();
+                } else {
+                    file.setStatus("err", null);
+                    CryptFXMLController.getFilesTab().refresh();
+                }
         }
         closeStage();
 

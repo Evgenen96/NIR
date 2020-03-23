@@ -64,21 +64,7 @@ public class CryptFXMLController {
         cryptSystem = new Crypt();
 
         //инициализация дерева
-        vBox1.setVgrow(treeviewFileBrowse, Priority.ALWAYS);
-        String hostName = "computer";
-        try {
-            hostName = InetAddress.getLocalHost().getHostName();
-        } catch (UnknownHostException x) {
-        }
-        TreeItem<String> rootNode = new TreeItem<>(hostName, new ImageView(new Image(ClassLoader.getSystemResourceAsStream("res/computer.png"))));
-        Iterable<Path> rootDirectories = FileSystems.getDefault().getRootDirectories();
-        for (Path name : rootDirectories) {
-            FilePathTreeItem treeNode = new FilePathTreeItem(new File(name.toString()));
-            rootNode.getChildren().add(treeNode);
-        }
-        rootNode.setExpanded(true);
-        this.treeviewFileBrowse.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        this.treeviewFileBrowse.setRoot(rootNode);
+        refreshFileBrowser();
 
         //инициализация таблицы
         this.tableSelectedFiles.setPlaceholder(new Label("Список пуст"));
@@ -170,6 +156,29 @@ public class CryptFXMLController {
             filePaths[i++] = file.getAbsPath();
         }
         StageLoader.loadWindow(getClass().getResource("/crypter/gui/decryptsettings/decryptFXML.fxml"), type.getName(), null);
+    }
+    
+    @FXML
+    private void btRefreshTreeAction() {
+        refreshFileBrowser();
+        this.tableSelectedFiles.refresh();
+    }
+    
+    private void refreshFileBrowser() {
+        String hostName = "computer";
+        try {
+            hostName = InetAddress.getLocalHost().getHostName();
+        } catch (UnknownHostException x) {
+        }
+        TreeItem<String> rootNode = new TreeItem<>(hostName, new ImageView(new Image(ClassLoader.getSystemResourceAsStream("res/computer.png"))));
+        Iterable<Path> rootDirectories = FileSystems.getDefault().getRootDirectories();
+        for (Path name : rootDirectories) {
+            FilePathTreeItem treeNode = new FilePathTreeItem(new File(name.toString()));
+            rootNode.getChildren().add(treeNode);
+        }
+        rootNode.setExpanded(true);
+        this.treeviewFileBrowse.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        this.treeviewFileBrowse.setRoot(rootNode);
     }
 
     public static Crypt getCryptSystem() {

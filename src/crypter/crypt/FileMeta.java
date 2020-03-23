@@ -1,10 +1,10 @@
 package crypter.crypt;
 
-import crypter.crypt.Crypt;
 import crypter.crypt.helpers.CryptTypes;
 import crypter.crypt.ciphers.VernameCrypt;
 import crypter.crypt.helpers.EncryptedText;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -28,12 +28,14 @@ public class FileMeta {
     private final static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd_MM_yyyy_HH_mm_ss", Locale.getDefault());
     private final static VernameCrypt SECRET_CRYPT = new VernameCrypt();
     private final static String SECRET_KEY = "2";
+    public final static String CIPHERED_FILE_FORMAT = ".crpt";
 
     //поля метки
     private Date date;
     private int fileID;
     private boolean cipherSave;
     private int markLength;
+    private String fileExtension;
 
     public FileMeta() {
         cipherSave = false;
@@ -50,24 +52,25 @@ public class FileMeta {
     }
 
     //сбор метки и вставка их в файл
-    public byte[] addMark(byte[] fileArray) {
+    public byte[] addMark(byte[] fileArray, String filePath) {
         String day = String.valueOf(LocalDateTime.now().getDayOfMonth());
         String month = String.valueOf((LocalDateTime.now().getMonth().getValue()));
         String year = String.valueOf(LocalDateTime.now().getYear());
         String hour = String.valueOf(LocalDateTime.now().getHour());
         String minute = String.valueOf(LocalDateTime.now().getMinute());
         String second = String.valueOf(LocalDateTime.now().getSecond());
+        fileExtension = filePath.substring(filePath.lastIndexOf('.'), filePath.length());
         byte[] byteMark;
         String stringMark;
 
         //если нужно сохранить информацию о шифровании
         if (cipherSave) {
-            stringMark = day + "_" + month + "_" + year + "_" + hour + "_" + minute + "_" + second
+            stringMark = fileExtension + ";;" + day + "_" + month + "_" + year + "_" + hour + "_" + minute + "_" + second
                     + "_" + INDEX_MARK + String.valueOf(fileID);
             stringMark = MARK + String.valueOf(stringMark.length()) + stringMark;
             byteMark = stringMark.getBytes();
         } else {
-            stringMark = day + "_" + month + "_" + year + "_" + hour + "_" + minute + "_" + second;
+            stringMark = fileExtension + ";;" + day + "_" + month + "_" + year + "_" + hour + "_" + minute + "_" + second;
             stringMark = MARK + String.valueOf(stringMark.length()) + stringMark;
             byteMark = stringMark.getBytes();
         }
@@ -92,13 +95,14 @@ public class FileMeta {
             //если в файле сохранен шифр
             if (fullMark.contains(INDEX_MARK)) {
                 cipherSave = true;
-                String dateString = fullMark.substring(0, fullMark.indexOf('k') - 1);
-                String indexFile = fullMark.substring(fullMark.indexOf('y') + 1, fullMark.length());
+                int separator = fullMark.indexOf(";;");
+                fileExtension = fullMark.substring(0, separator);
+                String dateString = fullMark.substring(separator, fullMark.lastIndexOf('k') - 1);
+                String indexFile = fullMark.substring(fullMark.lastIndexOf('y') + 1, fullMark.length());
                 fileID = Integer.valueOf(indexFile);
                 try {
                     date = DATE_FORMAT.parse(dateString);
                 } catch (ParseException ex) {
-                    Logger.getLogger(FileMeta.class.getName()).log(Level.SEVERE, null, ex);
                 }
             } else {
                 cipherSave = false;
@@ -123,7 +127,6 @@ public class FileMeta {
             String prevLine = null;
             line = br.readLine();
             while (line != null) {
-                System.out.println(line);
                 if (line.substring(0, idLength).equals(String.valueOf(fileID))) {
                     break;
                 }
@@ -135,7 +138,6 @@ public class FileMeta {
             if (IDcounter == 0) {
                 data = prevLine.split(";;;");
                 IDcounter = Integer.valueOf(data[0]) + 1;
-                System.out.println(IDcounter);
             } else if (line != null) {
                 data = line.split(";;;");
             } else {
@@ -165,6 +167,23 @@ public class FileMeta {
             Logger.getLogger(Crypt.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
             Logger.getLogger(Crypt.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public String changeExtension(String filePath) {  
+        String fileExt = filePath.substring(filePath.lastIndexOf('.'), filePath.length());
+        if (fileExt.equals(CIPHERED_FILE_FORMAT)) {
+            File file1 = new File(filePath);
+            String decryptedFilePath = filePath.substring(0, filePath.lastIndexOf('.')) + fileExtension;
+            File file2 = new File(decryptedFilePath);
+            file1.renameTo(file2);
+            return decryptedFilePath;
+        } else {
+            File file1 = new File(filePath);
+            String encryptedFilePath = filePath.substring(0, filePath.lastIndexOf('.') ) + CIPHERED_FILE_FORMAT;
+            File file2 = new File(encryptedFilePath);
+            file1.renameTo(file2);
+            return encryptedFilePath;
         }
     }
 

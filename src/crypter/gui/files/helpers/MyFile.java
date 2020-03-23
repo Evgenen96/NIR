@@ -1,5 +1,6 @@
 package crypter.gui.files.helpers;
 
+import crypter.crypt.FileMeta;
 import java.io.File;
 import java.util.Objects;
 import javafx.beans.property.SimpleStringProperty;
@@ -17,7 +18,7 @@ public class MyFile {
         String fileName = file.getName();
         if (file.getName().contains(".")) {
             extension = fileName.substring(fileName.lastIndexOf('.') + 1, fileName.length());
-            fileName = fileName.substring(0, fileName.length() - extension.length());
+            fileName = fileName.substring(0, fileName.length() - extension.length() - 1);
         } else {
             extension = "";
         }
@@ -29,7 +30,7 @@ public class MyFile {
         double div;
         int count = 0;
         String size = "";
-        div = fileSpace / 1024;
+        div = fileSpace / 10;
         while (div > 1024) {
             div = fileSpace / 1024;
             count++;
@@ -88,12 +89,58 @@ public class MyFile {
         return hash;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(String status, File file) {
         this.status = new SimpleStringProperty(status);
+        if (file == null) {
+            return;
+        }
+        String extension;
+        String fileName = file.getName();
+        if (file.getName().contains(".")) {
+            extension = fileName.substring(fileName.lastIndexOf('.') + 1, fileName.length());
+            fileName = fileName.substring(0, fileName.length() - extension.length() - 1);
+        } else {
+            extension = "";
+        }
+        name = new SimpleStringProperty(fileName);
+        type = new SimpleStringProperty(extension);
+
+        //подсчет размера
+        double fileSpace = file.length();
+        double div;
+        int count = 0;
+        String size = "";
+        div = fileSpace / 10;
+        while (div > 1024) {
+            div = fileSpace / 1024;
+            count++;
+            fileSpace = div;
+        }
+        switch (count) {
+            case 0: {
+                size = " Б";
+                break;
+            }
+            case 1: {
+                size = " КБ";
+                break;
+            }
+            case 2: {
+                size = " МБ";
+                break;
+            }
+            case 3: {
+                size = " ГБ";
+                break;
+            }
+        }
+        space = new SimpleStringProperty(String.format("%.2f", fileSpace) + size);
+        absPath = file.getAbsolutePath();
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(Object obj
+    ) {
         if (this == obj) {
             return true;
         }
