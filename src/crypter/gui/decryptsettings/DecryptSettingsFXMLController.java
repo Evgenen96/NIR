@@ -2,7 +2,7 @@ package crypter.gui.decryptsettings;
 
 import crypter.gui.encryptsettings.*;
 import crypter.crypt.helpers.CryptTypes;
-import crypter.gui.alert.AlertStage;
+import crypter.gui.elements.AlertStage;
 import crypter.gui.files.CryptFXMLController;
 import crypter.gui.files.helpers.MyFile;
 import java.io.File;
@@ -46,13 +46,13 @@ public class DecryptSettingsFXMLController implements Initializable {
         for (String filePath : CryptFXMLController.getFileToEncryptPath()) {
             MyFile file = (MyFile) CryptFXMLController.getFilesTab().getItems().get(i++);
             File tempFile = CryptFXMLController.getCryptSystem().decryptFile(type, filePath, passField1.getText());
-                if (tempFile != null) {
-                    file.setStatus("dec", tempFile);
-                    CryptFXMLController.getFilesTab().refresh();
-                } else {
-                    file.setStatus("err", null);
-                    CryptFXMLController.getFilesTab().refresh();
-                }
+            if (tempFile != null) {
+                file.setLog(CryptFXMLController.getCryptSystem().getLastError(), tempFile);
+                CryptFXMLController.getFilesTab().refresh();
+            } else {
+                file.setLog(CryptFXMLController.getCryptSystem().getLastError(), null);
+                CryptFXMLController.getFilesTab().refresh();
+            }
         }
         closeStage();
 

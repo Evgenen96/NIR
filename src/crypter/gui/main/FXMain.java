@@ -1,5 +1,7 @@
 package crypter.gui.main;
 
+import crypter.crypt.hashfucntion.HashFunction;
+import crypter.crypt.helpers.MyByteArr;
 import java.io.IOException;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;

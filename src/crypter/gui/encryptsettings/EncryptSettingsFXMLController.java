@@ -1,7 +1,7 @@
 package crypter.gui.encryptsettings;
 
 import crypter.crypt.helpers.CryptTypes;
-import crypter.gui.alert.AlertStage;
+import crypter.gui.elements.AlertStage;
 import crypter.gui.files.CryptFXMLController;
 import crypter.gui.files.helpers.MyFile;
 import java.io.File;
@@ -18,6 +18,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
@@ -42,7 +43,7 @@ public class EncryptSettingsFXMLController implements Initializable {
 
     @FXML
     private void btContinueAction(ActionEvent event) {
-        Optional<ButtonType> action = AlertStage.showSimpleAlert("Подтверждение", "Внимание! Если вы забудете\n"
+        Optional<ButtonType> action = AlertStage.showOkCanсel("Подтверждение", "Внимание! Если вы забудете\n"
                 + "или потеряете ключ шифрования,\n"
                 + "то данные в файле будут потеряны!", "Зашифровать", "Отменить");
         if (action.get().getButtonData() == ButtonData.OK_DONE) {
@@ -50,12 +51,12 @@ public class EncryptSettingsFXMLController implements Initializable {
             int i = 0;
             for (String filePath : CryptFXMLController.getFileToEncryptPath()) {
                 MyFile file = (MyFile) CryptFXMLController.getFilesTab().getItems().get(i++);
-                File tempFile = CryptFXMLController.getCryptSystem().encryptFile(type, filePath, passField1.getText(), this.checkSaveEncryption.isSelected());
+                File tempFile = CryptFXMLController.getCryptSystem().encryptFile(type, filePath, passField1.getText());
                 if (tempFile != null) {
-                    file.setStatus("cph", tempFile);
+                    file.setLog(CryptFXMLController.getCryptSystem().getLastError(), tempFile);
                     CryptFXMLController.getFilesTab().refresh();
                 } else {
-                    file.setStatus("err", null);
+                    file.setLog(CryptFXMLController.getCryptSystem().getLastError(), null);
                     CryptFXMLController.getFilesTab().refresh();
                 }
             }

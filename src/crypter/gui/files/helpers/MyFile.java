@@ -1,17 +1,21 @@
 package crypter.gui.files.helpers;
 
-import crypter.crypt.FileMeta;
+import crypter.crypt.helpers.States;
+import crypter.gui.elements.ButtonMaker;
+import crypter.gui.files.CryptFXMLController;
 import java.io.File;
 import java.util.Objects;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.scene.control.Button;
 
 public class MyFile {
 
     private SimpleStringProperty name;
     private SimpleStringProperty type;
     private SimpleStringProperty space;
-    private SimpleStringProperty status;
+    private States state;
     private String absPath;
+    private Button status;
 
     public MyFile(File file) {
         String extension;
@@ -55,7 +59,8 @@ public class MyFile {
             }
         }
         space = new SimpleStringProperty(String.format("%.2f", fileSpace) + size);
-        status = new SimpleStringProperty("unk");
+        state = States.NORMAL;
+ 
         absPath = file.getAbsolutePath();
     }
 
@@ -75,12 +80,20 @@ public class MyFile {
         return space.get();
     }
 
-    public String getStatus() {
-        return status.get();
+    public States getLog() {
+        return state;
     }
 
     public String getAbsPath() {
         return absPath;
+    }
+
+    public Button getStatus() {
+        return status;
+    }
+
+    public void setStatus(Button status) {
+        this.status = status;
     }
 
     @Override
@@ -89,8 +102,32 @@ public class MyFile {
         return hash;
     }
 
-    public void setStatus(String status, File file) {
-        this.status = new SimpleStringProperty(status);
+    public void setLog(States log, File file) {
+        this.state = log;
+        
+        status = CryptFXMLController.getButton(log, this);
+//        switch (log) {
+//            case NO_FILE: {
+//                status = CryptFXMLController.getButton(log,this);
+//                break;
+//            }
+//            case NO_MARK: {
+//                status = CryptFXMLController.getButton(log,this);
+//                break;
+//            }
+//            case SUCCESS_DEC: {
+//                status = CryptFXMLController.getButton(log,this);
+//                break;
+//            }
+//            case WRONG_KEY: {
+//                status = CryptFXMLController.getButton(log,this);
+//                break;
+//            }
+//            case NORMAL: {
+//                status = CryptFXMLController.getButton(log,this);
+//                break;
+//            }
+//        }
         if (file == null) {
             return;
         }
@@ -139,8 +176,7 @@ public class MyFile {
     }
 
     @Override
-    public boolean equals(Object obj
-    ) {
+    public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }

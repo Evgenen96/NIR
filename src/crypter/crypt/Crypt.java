@@ -9,6 +9,7 @@ import crypter.crypt.ciphers.SimpleCrypt;
 import crypter.crypt.ciphers.VernameCrypt;
 import crypter.crypt.helpers.EncryptedText;
 import crypter.crypt.helpers.Encryption;
+import crypter.crypt.helpers.States;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -23,12 +24,14 @@ import javax.crypto.NoSuchPaddingException;
 public class Crypt {
 
     //шифры
-    public CodewordCrypt codewordCrypt;
-    public VernameCrypt vernameCrypt;
-    public SimpleCrypt simpleCrypt;
-    public CesarCrypt cesarCrypt;
-    public RSA2Crypt rsaCrypt;
-    public GammaCrypt gammaCrypt;
+    private CodewordCrypt codewordCrypt;
+    private VernameCrypt vernameCrypt;
+    private SimpleCrypt simpleCrypt;
+    private CesarCrypt cesarCrypt;
+    private RSA2Crypt rsaCrypt;
+    private GammaCrypt gammaCrypt;
+
+    private States lastError;
 
     public Crypt() {
         codewordCrypt = new CodewordCrypt();
@@ -43,6 +46,7 @@ public class Crypt {
             Logger.getLogger(Crypt.class.getName()).log(Level.SEVERE, null, ex);
         }
         gammaCrypt = new GammaCrypt();
+        FileMetaMaker.initalize();
     }
 
     public Encryption getCrypt(CryptTypes cryptType) {
@@ -86,7 +90,7 @@ public class Crypt {
         return this.getCrypt(cryptType).decrypt(eText, key);
     }
 
-    public File encryptFile(CryptTypes cryptType, String fileName, String key, boolean saveEncryption) {
+    public File encryptFile(CryptTypes cryptType, String fileName, String key) {
         try {
             byte[] fileArray = Files.readAllBytes(Paths.get(fileName));
             byte[] encryptedFile;
@@ -95,23 +99,22 @@ public class Crypt {
             encryptedFile = this.getCrypt(cryptType).encryptFile(fileArray, key);
 
             //добавление метки, что файл зашифрован 
-            FileMeta cMark = new FileMeta(saveEncryption);
+            FileMetaMaker cMark = new FileMetaMaker();
             byte[] markedEnFile = cMark.addMark(encryptedFile, fileName);
 
-            //сохранения шифрования в секретный файл
-            if (saveEncryption) {
-                cMark.saveSecretKey(cryptType, key);
-            }
+            //сохранения хэша шифрования в секретный файл
+            cMark.saveSecretKey(cryptType, key);
 
             //запись в файл
             try (FileOutputStream fos = new FileOutputStream(fileName)) {
                 fos.write(markedEnFile);
             }
             File enFile = new File(cMark.changeExtension(fileName));
+            setLastError(States.SUCCESS_ENC);
             System.out.println(fileName + " был зашифрован методом " + cryptType.getName());
             return enFile;
         } catch (IOException ex) {
-            System.out.println("Ошибка при записи в файл " + fileName);
+            setLastError(States.NO_FILE);
             return null;
         }
 
@@ -123,25 +126,20 @@ public class Crypt {
             byte[] decryptedFile;
 
             //проверка наличия метки метки
-            FileMeta cMark = new FileMeta();
+            FileMetaMaker cMark = new FileMetaMaker();
             if (cMark.readMark(fileArray)) {
                 fileArray = Arrays.copyOfRange(fileArray, cMark.getMarkLength() + 10, fileArray.length);
             } else {
-                System.out.println("Файл не был расшифрован");
+                setLastError(States.NO_MARK);
                 return null;
             }
 
-            //извлечение индекса если есть
-            if (cMark.isCipherSaved()) {
-                String[] idLine = cMark.extractSecretKey();
-                if (idLine != null) {
-                    cryptType = CryptTypes.valueOf(idLine[1]);
-                    key = idLine[2];
-                } else {
-                    System.out.println("Ключ к файлу не найден");
-                    return null;
-                }
+            //извлечение индекса
+            if (!cMark.checkSecretKey(key)) {
+                setLastError(States.WRONG_KEY);
+                return null;
             }
+
             //расшифровка
             decryptedFile = this.getCrypt(cryptType).decryptFile(fileArray, key);
 
@@ -151,13 +149,22 @@ public class Crypt {
             fos.close();
 
             File deFile = new File(cMark.changeExtension(fileName));
+            setLastError(States.SUCCESS_DEC);
             System.out.println(fileName + " был расшифрован методом " + cryptType.getName());
             return deFile;
 
         } catch (IOException ex) {
-            System.out.println("Ошибка при расшифровки файла");
+            setLastError(States.NO_FILE);
             return null;
         }
+    }
 
+    public States getLastError() {
+        return lastError;
+    }
+
+    private void setLastError(States error) {
+        lastError = error;
+        System.out.println(error.getDescription());
     }
 }
