@@ -1,8 +1,7 @@
 package crypter.gui.files.helpers;
 
-import crypter.crypt.helpers.States;
-import crypter.gui.elements.ButtonMaker;
-import crypter.gui.files.CryptFXMLController;
+import crypter.crypt.helpers.CryptedFile;
+import crypter.gui.files.CryptController;
 import java.io.File;
 import java.util.Objects;
 import javafx.beans.property.SimpleStringProperty;
@@ -10,12 +9,14 @@ import javafx.scene.control.Button;
 
 public class MyFile {
 
+    private static CryptController crypt;
+
     private SimpleStringProperty name;
     private SimpleStringProperty type;
     private SimpleStringProperty space;
-    private States state;
     private String absPath;
     private Button status;
+    private CryptedFile file;
 
     public MyFile(File file) {
         String extension;
@@ -59,8 +60,7 @@ public class MyFile {
             }
         }
         space = new SimpleStringProperty(String.format("%.2f", fileSpace) + size);
-        state = States.NORMAL;
- 
+
         absPath = file.getAbsolutePath();
     }
 
@@ -80,9 +80,8 @@ public class MyFile {
         return space.get();
     }
 
-    public States getLog() {
-        return state;
-    }
+   
+ 
 
     public String getAbsPath() {
         return absPath;
@@ -102,38 +101,18 @@ public class MyFile {
         return hash;
     }
 
-    public void setLog(States log, File file) {
-        this.state = log;
-        
-        status = CryptFXMLController.getButton(log, this);
-//        switch (log) {
-//            case NO_FILE: {
-//                status = CryptFXMLController.getButton(log,this);
-//                break;
-//            }
-//            case NO_MARK: {
-//                status = CryptFXMLController.getButton(log,this);
-//                break;
-//            }
-//            case SUCCESS_DEC: {
-//                status = CryptFXMLController.getButton(log,this);
-//                break;
-//            }
-//            case WRONG_KEY: {
-//                status = CryptFXMLController.getButton(log,this);
-//                break;
-//            }
-//            case NORMAL: {
-//                status = CryptFXMLController.getButton(log,this);
-//                break;
-//            }
-//        }
-        if (file == null) {
+    public void setState(CryptedFile cryptedFile) {
+        this.file = cryptedFile;
+
+
+        status = crypt.getButton(this);
+
+        if (file.getFile() == null) {
             return;
         }
         String extension;
-        String fileName = file.getName();
-        if (file.getName().contains(".")) {
+        String fileName = file.getFile().getName();
+        if (file.getFile().getName().contains(".")) {
             extension = fileName.substring(fileName.lastIndexOf('.') + 1, fileName.length());
             fileName = fileName.substring(0, fileName.length() - extension.length() - 1);
         } else {
@@ -143,7 +122,7 @@ public class MyFile {
         type = new SimpleStringProperty(extension);
 
         //подсчет размера
-        double fileSpace = file.length();
+        double fileSpace = file.getFile().length();
         double div;
         int count = 0;
         String size = "";
@@ -172,7 +151,7 @@ public class MyFile {
             }
         }
         space = new SimpleStringProperty(String.format("%.2f", fileSpace) + size);
-        absPath = file.getAbsolutePath();
+        absPath = file.getFile().getAbsolutePath();
     }
 
     @Override
@@ -192,5 +171,15 @@ public class MyFile {
         }
         return true;
     }
+
+    public static void setCrypt(CryptController crypt) {
+        MyFile.crypt = crypt;
+    }
+
+    public CryptedFile getCryptInfo() {
+        return file;
+    }
+    
+    
 
 }

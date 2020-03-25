@@ -1,6 +1,5 @@
 package crypter.crypt.ciphers;
 
-import crypter.crypt.helpers.Encryption;
 import java.util.Random;
 
 

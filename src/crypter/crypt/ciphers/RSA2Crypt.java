@@ -3,7 +3,6 @@ package crypter.crypt.ciphers;
 import crypter.crypt.helpers.CryptTypes;
 import crypter.crypt.helpers.EncryptedText;
 import crypter.crypt.helpers.Encryption;
-import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;

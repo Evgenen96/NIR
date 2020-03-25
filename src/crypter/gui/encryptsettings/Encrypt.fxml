@@ -12,7 +12,7 @@
 <?import javafx.scene.paint.Stop?>
 <?import javafx.scene.shape.Line?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="191.0" prefWidth="237.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="crypter.gui.decryptsettings.DecryptController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="191.0" prefWidth="237.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="crypter.gui.encryptsettings.EncryptController">
    <center>
       <VBox prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
          <children>
@@ -32,32 +32,50 @@
                   <Insets top="5.0" />
                </VBox.margin>
             </Line>
-            <Label text="Введите пароль:" textAlignment="CENTER" />
+            <Label text="Придумайте ключ:" textAlignment="CENTER" />
             <TextField fx:id="passField1" />
-            <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" />
+            <Line endX="100.0" fill="#d6202000" startX="-100.0" strokeLineCap="ROUND" strokeLineJoin="ROUND" strokeWidth="3.0">
+               <stroke>
+                  <LinearGradient endX="1.0" endY="1.0">
+                     <stops>
+                        <Stop color="TRANSPARENT" />
+                        <Stop color="#757575" offset="0.49425287356321834" />
+                        <Stop color="TRANSPARENT" offset="1.0" />
+                     </stops>
+                  </LinearGradient>
+               </stroke>
+               <VBox.margin>
+                  <Insets top="5.0" />
+               </VBox.margin>
+            </Line>
+            <Button mnemonicParsing="false" prefHeight="25.0" prefWidth="208.0" text="Cохранить ключ в файл">
+               <VBox.margin>
+                  <Insets top="5.0" />
+               </VBox.margin>
+            </Button>
          </children>
          <BorderPane.margin>
-            <Insets left="15.0" right="15.0" top="15.0" />
+            <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
          </BorderPane.margin>
       </VBox>
    </center>
    <bottom>
-      <HBox alignment="BOTTOM_RIGHT" BorderPane.alignment="BOTTOM_RIGHT">
-         <BorderPane.margin>
-            <Insets bottom="15.0" left="15.0" right="15.0" />
-         </BorderPane.margin>
+      <HBox alignment="CENTER_RIGHT" prefHeight="29.0" prefWidth="430.0" BorderPane.alignment="CENTER">
          <children>
             <Button mnemonicParsing="false" onAction="#btContinueAction" text="Продолжить">
                <HBox.margin>
-                  <Insets right="5.0" />
+                  <Insets bottom="10.0" right="5.0" />
                </HBox.margin>
             </Button>
             <Button mnemonicParsing="false" onAction="#btCancelAction" text="Отмена">
                <HBox.margin>
-                  <Insets />
+                  <Insets bottom="10.0" />
                </HBox.margin>
             </Button>
          </children>
+         <BorderPane.margin>
+            <Insets left="15.0" right="15.0" />
+         </BorderPane.margin>
       </HBox>
    </bottom>
 </BorderPane>

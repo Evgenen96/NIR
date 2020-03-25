@@ -7,6 +7,7 @@ import crypter.crypt.ciphers.GammaCrypt;
 import crypter.crypt.ciphers.RSA2Crypt;
 import crypter.crypt.ciphers.SimpleCrypt;
 import crypter.crypt.ciphers.VernameCrypt;
+import crypter.crypt.helpers.CryptedFile;
 import crypter.crypt.helpers.EncryptedText;
 import crypter.crypt.helpers.Encryption;
 import crypter.crypt.helpers.States;
@@ -30,8 +31,6 @@ public class Crypt {
     private CesarCrypt cesarCrypt;
     private RSA2Crypt rsaCrypt;
     private GammaCrypt gammaCrypt;
-
-    private States lastError;
 
     public Crypt() {
         codewordCrypt = new CodewordCrypt();
@@ -90,9 +89,9 @@ public class Crypt {
         return this.getCrypt(cryptType).decrypt(eText, key);
     }
 
-    public File encryptFile(CryptTypes cryptType, String fileName, String key) {
+    public CryptedFile encryptFile(CryptTypes cryptType, String fileAbsPath, String key) {
         try {
-            byte[] fileArray = Files.readAllBytes(Paths.get(fileName));
+            byte[] fileArray = Files.readAllBytes(Paths.get(fileAbsPath));
             byte[] encryptedFile;
 
             //шифрование
@@ -100,29 +99,27 @@ public class Crypt {
 
             //добавление метки, что файл зашифрован 
             FileMetaMaker cMark = new FileMetaMaker();
-            byte[] markedEnFile = cMark.addMark(encryptedFile, fileName);
+            byte[] markedEnFile = cMark.addMark(encryptedFile, fileAbsPath);
 
             //сохранения хэша шифрования в секретный файл
             cMark.saveSecretKey(cryptType, key);
 
             //запись в файл
-            try (FileOutputStream fos = new FileOutputStream(fileName)) {
+            try (FileOutputStream fos = new FileOutputStream(fileAbsPath)) {
                 fos.write(markedEnFile);
             }
-            File enFile = new File(cMark.changeExtension(fileName));
-            setLastError(States.SUCCESS_ENC);
-            System.out.println(fileName + " был зашифрован методом " + cryptType.getName());
-            return enFile;
+            File enFile = new File(cMark.changeExtension(fileAbsPath));
+            System.out.println(fileAbsPath + " был зашифрован методом " + cryptType.getName());
+            return new CryptedFile(enFile, key, cryptType, States.SUCCESS_ENC);
         } catch (IOException ex) {
-            setLastError(States.NO_FILE);
-            return null;
+            return new CryptedFile(null, key, cryptType, States.NO_FILE);
         }
 
     }
 
-    public File decryptFile(CryptTypes cryptType, String fileName, String key) {
+    public CryptedFile decryptFile(CryptTypes cryptType, String fileAbsPath, String key) {
         try {
-            byte[] fileArray = Files.readAllBytes(Paths.get(fileName));
+            byte[] fileArray = Files.readAllBytes(Paths.get(fileAbsPath));
             byte[] decryptedFile;
 
             //проверка наличия метки метки
@@ -130,41 +127,66 @@ public class Crypt {
             if (cMark.readMark(fileArray)) {
                 fileArray = Arrays.copyOfRange(fileArray, cMark.getMarkLength() + 10, fileArray.length);
             } else {
-                setLastError(States.NO_MARK);
-                return null;
+                return new CryptedFile(null, key, cryptType, States.NO_MARK);
             }
 
             //извлечение индекса
             if (!cMark.checkSecretKey(key)) {
-                setLastError(States.WRONG_KEY);
-                return null;
+                return new CryptedFile(null, key, cryptType, States.WRONG_KEY);
             }
 
             //расшифровка
             decryptedFile = this.getCrypt(cryptType).decryptFile(fileArray, key);
 
             //запись
-            FileOutputStream fos = new FileOutputStream(fileName);
+            FileOutputStream fos = new FileOutputStream(fileAbsPath);
             fos.write(decryptedFile);
             fos.close();
 
-            File deFile = new File(cMark.changeExtension(fileName));
-            setLastError(States.SUCCESS_DEC);
-            System.out.println(fileName + " был расшифрован методом " + cryptType.getName());
-            return deFile;
+            File deFile = new File(cMark.changeExtension(fileAbsPath));
+            System.out.println(fileAbsPath + " был расшифрован методом " + cryptType.getName());
+            return new CryptedFile(deFile, key, cryptType, States.SUCCESS_DEC);
 
         } catch (IOException ex) {
-            setLastError(States.NO_FILE);
-            return null;
+            return new CryptedFile(null, key, cryptType, States.NO_FILE);
         }
     }
 
-    public States getLastError() {
-        return lastError;
+    public CryptedFile decryptFile(CryptTypes cryptType, String fileAbsPath, String key, boolean isForced) {
+        try {
+            byte[] fileArray = Files.readAllBytes(Paths.get(fileAbsPath));
+            byte[] decryptedFile;
+
+            //проверка наличия метки метки
+            FileMetaMaker cMark = new FileMetaMaker();
+            if (!isForced) {
+                if (cMark.readMark(fileArray)) {
+                    fileArray = Arrays.copyOfRange(fileArray, cMark.getMarkLength() + 10, fileArray.length);
+                } else {
+                    return new CryptedFile(null, key, cryptType, States.NO_MARK);
+                }
+            }
+
+            //извлечение индекса
+            if (!cMark.checkSecretKey(key) && !isForced) {
+                return new CryptedFile(null, key, cryptType, States.WRONG_KEY);
+            }
+
+            //расшифровка
+            decryptedFile = this.getCrypt(cryptType).decryptFile(fileArray, key);
+
+            //запись
+            FileOutputStream fos = new FileOutputStream(fileAbsPath);
+            fos.write(decryptedFile);
+            fos.close();
+
+            File deFile = new File(cMark.changeExtension(fileAbsPath));
+            System.out.println(fileAbsPath + " был расшифрован методом " + cryptType.getName());
+            return new CryptedFile(deFile, key, cryptType, States.SUCCESS_DEC);
+
+        } catch (IOException ex) {
+            return new CryptedFile(null, key, cryptType, States.NO_FILE);
+        }
     }
 
-    private void setLastError(States error) {
-        lastError = error;
-        System.out.println(error.getDescription());
-    }
 }

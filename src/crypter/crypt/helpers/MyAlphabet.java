@@ -1,8 +1,7 @@
 package crypter.crypt.helpers;
 
 //класс-алфавит
-//синглтон???
-import crypter.crypt.helpers.MyChar;
+//синглтон777
 import java.util.ArrayList;
 
 public class MyAlphabet {
