@@ -14,18 +14,18 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="crypter.gui.files.CryptController">
+<BorderPane prefHeight="530.0" prefWidth="810.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="crypter.gui.files.CryptController">
    <center>
-      <HBox prefHeight="465.0" prefWidth="800.0" BorderPane.alignment="CENTER">
+      <HBox prefHeight="418.0" prefWidth="838.0" BorderPane.alignment="CENTER">
          <children>
-            <VBox fx:id="vBox1">
+            <VBox fx:id="vBox1" prefHeight="444.0" prefWidth="384.0">
                <children>
                   <Label text="Выберите файлы">
                      <VBox.margin>
                         <Insets left="10.0" />
                      </VBox.margin>
                   </Label>
-                  <TreeView fx:id="treeviewFileBrowse" minHeight="350.0" prefHeight="347.0" prefWidth="385.0">
+                  <TreeView fx:id="treeviewFileBrowse" minHeight="350.0" prefHeight="386.0" prefWidth="383.0">
                      <VBox.margin>
                         <Insets />
                      </VBox.margin>
@@ -34,14 +34,14 @@
                      <items>
                         <Button mnemonicParsing="false">
                            <graphic>
-                              <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
+                              <ImageView fitHeight="16.0" fitWidth="16.0" onDragDetected="#btRefreshTreeAction" pickOnBounds="true" preserveRatio="true">
                                  <image>
-                                    <Image url="@../res/list-add.png" />
+                                    <Image url="@../../../res/refresh.png" />
                                  </image>
                               </ImageView>
                            </graphic>
                         </Button>
-                        <TextField fx:id="textFileInfo" editable="false" prefHeight="25.0" prefWidth="300.0" />
+                        <TextField fx:id="textFileInfo" editable="false" prefHeight="25.0" prefWidth="334.0" />
                      </items>
                   </ToolBar>
                </children>
@@ -57,46 +57,38 @@
                   <Insets left="5.0" right="5.0" />
                </HBox.margin>
             </HBox>
-            <VBox prefHeight="360.0" prefWidth="365.0">
+            <VBox prefHeight="418.0" prefWidth="360.0">
                <children>
                   <Label text="Список выбранных файлов">
                      <VBox.margin>
                         <Insets left="10.0" />
                      </VBox.margin>
                   </Label>
-                  <HBox>
+                  <HBox prefHeight="366.0" prefWidth="362.0">
                      <children>
-                        <TableView fx:id="tableSelectedFiles" minHeight="350.0" prefHeight="409.0" prefWidth="364.0">
+                        <TableView fx:id="tableSelectedFiles" minHeight="350.0" prefHeight="366.0" prefWidth="359.0">
                           <columns>
-                            <TableColumn fx:id="colFileName" prefWidth="205.0" text="Имя файла" />
-                              <TableColumn fx:id="colFileType" minWidth="0.0" prefWidth="30.0" text="Тип" />
-                              <TableColumn fx:id="colFileSpace" prefWidth="76.0" text="Размер" />
-                              <TableColumn fx:id="colFileStatus" prefWidth="52.0" style="-fx-alignment: CENTER;" text="Статус" />
+                            <TableColumn fx:id="colFileName" editable="false" prefWidth="191.66668701171875" style="-fx-alignment: CENTER-LEFT;" text="Имя файла" />
+                              <TableColumn fx:id="colFileType" editable="false" minWidth="0.0" prefWidth="39.66668701171875" style="-fx-alignment: CENTER-LEFT;" text="Тип" />
+                              <TableColumn fx:id="colFileSpace" editable="false" prefWidth="55.6666259765625" style="-fx-alignment: CENTER-LEFT;" text="Размер" />
+                              <TableColumn fx:id="colFileStatus" editable="false" prefWidth="42.3333740234375" sortable="false" style="-fx-alignment: CENTER;" text="Статус" />
+                              <TableColumn fx:id="colRemoveFile" editable="false" prefWidth="25.66668701171875" sortable="false" style="-fx-alignment: CENTER;" />
                           </columns>
                         </TableView>
                      </children>
                   </HBox>
                   <ToolBar prefHeight="42.0" prefWidth="365.0">
                      <items>
-                        <Button fx:id="btRemoveSelected" mnemonicParsing="false" onAction="#btRemoveSelectedAction">
-                           <graphic>
-                              <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
-                                 <image>
-                                    <Image url="@../res/list-remove.png" />
-                                 </image>
-                              </ImageView>
-                           </graphic>
-                        </Button>
                         <Button fx:id="btRemoveAll" mnemonicParsing="false" onAction="#btRemoveAllAction">
                            <graphic>
                               <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
-                                    <Image url="@../res/list-remove.png" />
+                                    <Image url="@../../../res/edit-clear.png" />
                                  </image>
                               </ImageView>
                            </graphic>
                         </Button>
-                        <TextField fx:id="textSelFileInfo" editable="false" prefHeight="25.0" prefWidth="250.0" />
+                        <TextField fx:id="textSelFileInfo" editable="false" prefHeight="25.0" prefWidth="378.0" />
                      </items>
                   </ToolBar>
                </children>
@@ -108,33 +100,61 @@
       </HBox>
    </center>
    <top>
-      <ToolBar prefHeight="40.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+      <ToolBar prefHeight="112.0" prefWidth="874.0">
         <items>
-          <Button mnemonicParsing="false" onAction="#btRefreshTreeAction" text="Button" />
-        </items>
-         <BorderPane.margin>
-            <Insets />
-         </BorderPane.margin>
-      </ToolBar>
-   </top>
-   <bottom>
-      <VBox prefHeight="158.0" prefWidth="800.0" BorderPane.alignment="CENTER">
-         <children>
-            <HBox alignment="CENTER_RIGHT" prefHeight="42.0" prefWidth="800.0">
+            <HBox alignment="CENTER_LEFT" prefHeight="102.0" prefWidth="796.0">
                <children>
-                  <Button fx:id="btEncryptFile" alignment="CENTER_RIGHT" mnemonicParsing="false" onAction="#btEncryptFileAction" text="Зашифровать">
+                  <Button fx:id="btEncryptFile" alignment="CENTER" contentDisplay="TOP" mnemonicParsing="false" onAction="#btEncryptFileAction" prefHeight="93.0" prefWidth="100.0" text="Зашифровать">
+                     <graphic>
+                        <ImageView fitHeight="64.0" fitWidth="64.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../../../res/encrypt.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                  </Button>
+                  <Button fx:id="btDecryptFile" alignment="CENTER" contentDisplay="TOP" mnemonicParsing="false" onAction="#btDecryptFileAction" prefHeight="93.0" prefWidth="100.0" text="Расшифровать">
+                     <graphic>
+                        <ImageView fitHeight="64.0" fitWidth="64.0" layoutX="10.0" pickOnBounds="true" preserveRatio="true" translateX="5.0" x="100.0">
+                           <image>
+                              <Image url="@../../../res/decrypt.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
                      <HBox.margin>
-                        <Insets left="5.0" right="5.0" />
+                        <Insets left="10.0" />
                      </HBox.margin>
                   </Button>
-                  <Button fx:id="btDecryptFile" alignment="CENTER_RIGHT" mnemonicParsing="false" onAction="#btDecryptFileAction" text="Расшифровать">
+                <Button alignment="CENTER" contentDisplay="TOP" mnemonicParsing="false" prefHeight="93.0" prefWidth="100.0" text="Настройки">
+                     <graphic>
+                        <ImageView fitHeight="64.0" fitWidth="64.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../../../res/settings.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
                      <HBox.margin>
-                        <Insets left="5.0" right="5.0" />
+                        <Insets left="360.0" right="10.0" />
+                     </HBox.margin>
+                  </Button>
+                  <Button alignment="CENTER" contentDisplay="TOP" mnemonicParsing="false" prefHeight="93.0" prefWidth="100.0" text="Помощь">
+                     <graphic>
+                        <ImageView fitHeight="64.0" fitWidth="64.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../../../res/question.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                     <HBox.margin>
+                        <Insets />
                      </HBox.margin>
                   </Button>
                </children>
+               <padding>
+                  <Insets left="10.0" right="5.0" />
+               </padding>
             </HBox>
-         </children>
-      </VBox>
-   </bottom>
+        </items>
+      </ToolBar>
+   </top>
 </BorderPane>

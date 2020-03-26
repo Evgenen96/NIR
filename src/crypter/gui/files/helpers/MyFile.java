@@ -3,21 +3,36 @@ package crypter.gui.files.helpers;
 import crypter.crypt.helpers.CryptedFile;
 import crypter.gui.files.CryptController;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.Objects;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.control.Button;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.Background;
 
+
+//класс-строка в таблице списка выбранных файлов
 public class MyFile {
 
     private static CryptController crypt;
 
+    //поля таблицы
     private SimpleStringProperty name;
     private SimpleStringProperty type;
     private SimpleStringProperty space;
-    private String absPath;
     private Button status;
-    private CryptedFile file;
+    private Button relove;
 
+    private String absPath;
+    private CryptedFile file;
+    private static FileInputStream fis;
+    private static Image i;
+
+  
     public MyFile(File file) {
         String extension;
         String fileName = file.getName();
@@ -62,54 +77,33 @@ public class MyFile {
         space = new SimpleStringProperty(String.format("%.2f", fileSpace) + size);
 
         absPath = file.getAbsolutePath();
+        try {
+            fis = new FileInputStream("src/res/processing.gif");
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(MyFile.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        i = new Image(fis, 16, 16, true, true);
     }
 
-    public MyFile(String absPath) {
-
+    public static CryptController getCrypt() {
+        return crypt;
     }
 
-    public String getName() {
-        return name.get();
+    public void setStatusImage() {
+        status = new Button();
+        status.setBackground(Background.EMPTY);
+        status.setGraphic(new ImageView(i));
     }
 
-    public String getType() {
-        return type.get();
-    }
-
-    public String getSpace() {
-        return space.get();
-    }
-
-   
- 
-
-    public String getAbsPath() {
-        return absPath;
-    }
-
-    public Button getStatus() {
-        return status;
-    }
-
-    public void setStatus(Button status) {
-        this.status = status;
-    }
-
-    @Override
-    public int hashCode() {
-        int hash = 7;
-        return hash;
-    }
-
+    //апдейт записи в таблице
     public void setState(CryptedFile cryptedFile) {
         this.file = cryptedFile;
 
-
-        status = crypt.getButton(this);
-
         if (file.getFile() == null) {
+            relove = crypt.getButton(this);
             return;
         }
+        status = crypt.getButton(this);
         String extension;
         String fileName = file.getFile().getName();
         if (file.getFile().getName().contains(".")) {
@@ -154,6 +148,46 @@ public class MyFile {
         absPath = file.getFile().getAbsolutePath();
     }
 
+    public static void setCrypt(CryptController crypt) {
+        MyFile.crypt = crypt;
+    }
+
+    public CryptedFile getCryptInfo() {
+        return file;
+    }
+
+    public String getName() {
+        return name.get();
+    }
+
+    public String getType() {
+        return type.get();
+    }
+
+    public String getSpace() {
+        return space.get();
+    }
+
+    public String getAbsPath() {
+        return absPath;
+    }
+
+    public Button getStatus() {
+        return status;
+    }
+
+    public Button getRelove() {
+        return relove;
+    }
+
+    public void setStatus(Button status) {
+        this.status = status;
+    }
+
+    public void setRelove(Button relove) {
+        this.relove = relove;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -172,14 +206,10 @@ public class MyFile {
         return true;
     }
 
-    public static void setCrypt(CryptController crypt) {
-        MyFile.crypt = crypt;
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        return hash;
     }
-
-    public CryptedFile getCryptInfo() {
-        return file;
-    }
-    
-    
 
 }

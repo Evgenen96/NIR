@@ -1,5 +1,6 @@
 package crypter.crypt.helpers;
 
+
 public interface Encryption {
 
     public EncryptedText encrypt(String line, String key);

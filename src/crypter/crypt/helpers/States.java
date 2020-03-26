@@ -6,15 +6,17 @@ public enum States {
     WRONG_KEY,
     SUCCESS_DEC,
     DEFAULT,
-    SUCCESS_ENC;
+    SUCCESS_ENC,
+    PROCESSING;
 
     private static final String[] TYPES = {
         "Файл не доступен. \nНажмите, чтобы попробовать снова.",
         "Данный файл не был зашифрован",
         "Ключ шифрования введен неверно",
         "Успешно",
-        "Default",
-        "Успешно"};
+        "Убрать",
+        "Успешно",
+        "В процессе"};
 
     public static String getName(States type) {
         return TYPES[type.ordinal()];

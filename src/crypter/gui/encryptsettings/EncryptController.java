@@ -7,12 +7,14 @@ import crypter.gui.files.CryptController;
 import static crypter.gui.files.CryptController.mainStageSetDisabled;
 import crypter.gui.files.helpers.MyFile;
 import crypter.gui.settings.Settings;
-import java.io.Closeable;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Optional;
 import java.util.ResourceBundle;
-import javafx.application.Platform;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -23,6 +25,7 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -33,6 +36,11 @@ public class EncryptController implements Initializable {
     TextField passField1;
     @FXML
     ChoiceBox choiceCryptType;
+    @FXML
+    ProgressBar progressBar;
+
+    private EncryptTask task;
+    private static ExecutorService executor;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -41,8 +49,16 @@ public class EncryptController implements Initializable {
             this.choiceCryptType.getItems().add(CryptTypes.getName(CryptTypes.values()[i]));
         }
         choiceCryptType.getSelectionModel().selectFirst();
-        
-        
+        executor = Executors.newFixedThreadPool(2, new ThreadFactory() {
+            @Override
+            public Thread newThread(Runnable r) {
+                Thread t = new Thread(r);
+                t.setDaemon(false);
+                return t;
+            }
+        });
+        task = new EncryptTask();
+
     }
 
     @FXML
@@ -55,18 +71,20 @@ public class EncryptController implements Initializable {
                     + "то данные в файле будут потеряны!",
                     "Зашифровать", "Отменить", 2);
             if (action.get().getButtonData() == ButtonData.OK_DONE) {
-                encryptFile();
+                executor.execute(task);
+                closeStage();
             } else {
                 //отмена действия
             }
         } else {
-            encryptFile();
+            executor.execute(task);
+            closeStage();
         }
     }
 
     private void encryptFile() {
         int i = 0;
-        for (String filePath : CryptController.getFileToEncryptPath()) {
+        for (String filePath : CryptController.getFilesToEncryptPath()) {
             MyFile file = (MyFile) CryptController.getFilesTab().getItems().get(i++);
             CryptedFile tempFile = CryptController.getCryptSystem().encryptFile(
                     CryptTypes.getCryptType(
@@ -99,6 +117,32 @@ public class EncryptController implements Initializable {
             mainStageSetDisabled(false);
         } catch (IOException ex) {
         }
+    }
+
+    class EncryptTask extends Task {
+
+        @Override
+        protected Integer call() throws Exception {
+
+            int i = 0;
+            for (String filePath : CryptController.getFilesToEncryptPath()) {
+                MyFile file = (MyFile) CryptController.getFilesTab().getItems().get(i++);
+                file.setStatusImage();
+                CryptController.getFilesTab().refresh();
+                CryptedFile tempFile = CryptController.getCryptSystem().encryptFile(
+                        CryptTypes.getCryptType(choiceCryptType.getSelectionModel().getSelectedItem().toString()),
+                        filePath, passField1.getText());
+                file.setState(tempFile);
+                CryptController.getFilesTab().refresh();
+            }
+            return null;
+        }
+
+    }
+
+
+    public static ExecutorService getExecutor() {
+        return executor;
     }
 
 }

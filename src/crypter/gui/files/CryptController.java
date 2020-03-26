@@ -1,6 +1,7 @@
 package crypter.gui.files;
 
-import crypter.crypt.Crypt;
+import crypter.crypt.CryptFactory;
+import crypter.crypt.ciphers.GammaCrypt;
 import crypter.crypt.helpers.CryptedFile;
 import crypter.crypt.helpers.States;
 import crypter.gui.elements.AlertFactory;
@@ -11,9 +12,12 @@ import java.net.UnknownHostException;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import crypter.gui.files.helpers.FilePathTreeItem;
+import crypter.gui.helpers.MyProgress;
 import crypter.gui.helpers.StageLoader;
 import crypter.gui.settings.Settings;
 import java.util.Optional;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -24,6 +28,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -36,6 +41,11 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundImage;
+import javafx.scene.layout.BackgroundPosition;
+import javafx.scene.layout.BackgroundRepeat;
+import javafx.scene.layout.BackgroundSize;
 
 public class CryptController {
 
@@ -52,17 +62,21 @@ public class CryptController {
     @FXML
     private TableColumn<MyFile, Button> colFileStatus;
     @FXML
+    private TableColumn<MyFile, Button> colRemoveFile;
+    @FXML
     private TextField textSelFileInfo;
     @FXML
     private TextField textFileInfo;
+    @FXML
+    private ProgressBar progressBar;
 
-    private static Crypt cryptSystem;
+    private static CryptFactory cryptSystem;
     private static String[] filePaths;
     private static TableView filesTab;
 
     @FXML
     void initialize() {
-        cryptSystem = new Crypt();
+        cryptSystem = new CryptFactory();
 
         //инициализация дерева
         refreshFileBrowser();
@@ -73,22 +87,31 @@ public class CryptController {
         this.colFileType.setCellValueFactory(new PropertyValueFactory<>("Type"));
         this.colFileSpace.setCellValueFactory(new PropertyValueFactory<>("Space"));
         this.colFileStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
+        this.colRemoveFile.setCellValueFactory(new PropertyValueFactory<>("relove"));
         filesTab = this.tableSelectedFiles;
 
         treeviewFileBrowse.setOnMouseClicked((MouseEvent event) -> {
             if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
                 FilePathTreeItem item = (FilePathTreeItem) this.treeviewFileBrowse.getSelectionModel().getSelectedItem();
-                if (!item.isDirectory()) {
-                    MyFile file = new MyFile(item.getFile());
-                    file.setState(new CryptedFile(null, null, null, States.DEFAULT));
-                    if (!this.tableSelectedFiles.getItems().contains(file)) {
-                        this.tableSelectedFiles.getItems().add(file);
+                if (item != null) {
+                    if (!item.isDirectory()) {
+                        MyFile file = new MyFile(item.getFile());
+
+                        if (!this.tableSelectedFiles.getItems().contains(file)) {
+                            file.setState(new CryptedFile(null, null, null, States.DEFAULT));
+                     
+                            this.tableSelectedFiles.getItems().add(file);
+                        }
                     }
                 }
             }
-        });
 
-        MyFile.setCrypt(this);
+        }
+        );
+
+        //передается ссылка на контроллер
+        MyFile.setCrypt(
+                this);
 
     }
 
@@ -195,11 +218,11 @@ public class CryptController {
 
     }
 
-    public static Crypt getCryptSystem() {
+    public static CryptFactory getCryptSystem() {
         return cryptSystem;
     }
 
-    public static String[] getFileToEncryptPath() {
+    public static String[] getFilesToEncryptPath() {
         return filePaths;
     }
 
@@ -220,7 +243,7 @@ public class CryptController {
         button.setOnMouseEntered(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
-                Point2D p = new Point2D(event.getSceneX() + 250, event.getSceneY() + 80);
+                Point2D p = new Point2D(event.getSceneX() + 260, event.getSceneY() + 70);
                 tooltip.show(button, p.getX(), p.getY());
             }
         });
@@ -232,6 +255,7 @@ public class CryptController {
         });
         switch (file.getCryptInfo().getState()) {
             case NO_FILE: {
+                button.setBackground(Background.EMPTY);
                 button.setGraphic(new ImageView(new Image("/res/no-file.png", 16, 16, true, true)));
                 button.setOnAction((ActionEvent event) -> {
                     mainStageSetDisabled(true);
@@ -240,6 +264,7 @@ public class CryptController {
                 break;
             }
             case NO_MARK: {
+                button.setBackground(Background.EMPTY);
                 button.setGraphic(new ImageView(new Image("/res/no-mark.png", 16, 16, true, true)));
                 button.setOnAction((ActionEvent event) -> {
                     filesTab.getItems().remove(file);
@@ -249,6 +274,7 @@ public class CryptController {
                 break;
             }
             case SUCCESS_DEC: {
+               button.setBackground(Background.EMPTY);  
                 button.setGraphic(new ImageView(new Image("/res/success.png", 16, 16, true, true)));
                 button.setOnAction((ActionEvent event) -> {
                     if (Settings.isSHOW_ENCRYPT_CONFIRMATION_DIALOG()) {
@@ -273,6 +299,7 @@ public class CryptController {
                 break;
             }
             case SUCCESS_ENC: {
+                button.setBackground(Background.EMPTY);
                 button.setGraphic(new ImageView(new Image("/res/success.png", 16, 16, true, true)));
                 button.setOnAction((ActionEvent event) -> {
                     filesTab.getItems().remove(file);
@@ -281,6 +308,7 @@ public class CryptController {
                 break;
             }
             case WRONG_KEY: {
+                button.setBackground(Background.EMPTY);
                 button.setGraphic(new ImageView(new Image("/res/wrong-key.png", 16, 16, true, true)));
                 button.setOnAction((ActionEvent event) -> {
                     Optional<ButtonType> action = AlertFactory.showOkCanсel("Неверный ключ", "Файл был зашифрован другим ключом. \n"
@@ -297,6 +325,7 @@ public class CryptController {
                 break;
             }
             case DEFAULT: {
+                button.setBackground(Background.EMPTY);
                 button.setGraphic(new ImageView(new Image("/res/remove-file.png", 16, 16, true, true)));
                 button.setOnAction((ActionEvent event) -> {
                     filesTab.getItems().remove(file);
@@ -307,4 +336,15 @@ public class CryptController {
         }
         return button;
     }
+
+   
+
+//    public BackgroundImage getBG(String imagePath) {
+//        BackgroundImage backgroundImage = new BackgroundImage(
+//                new Image(getClass().getResource(
+//                        imagePath).toExternalForm(), 16, 16, true, true),
+//                BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT,
+//                BackgroundPosition.CENTER, BackgroundSize.DEFAULT);
+//        return backgroundImage;
+//    }
 }

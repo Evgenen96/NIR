@@ -1,12 +1,9 @@
 package crypter.crypt;
 
 import crypter.crypt.helpers.CryptTypes;
-import crypter.crypt.ciphers.VernameCrypt;
 import crypter.crypt.hashfucntion.HashFunction;
-import crypter.crypt.helpers.EncryptedText;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -154,7 +151,7 @@ public class FileMetaMaker {
             IDcounter++;
         } catch (IOException ex) {
             ///777 создание нового файла при потере старого
-            Logger.getLogger(Crypt.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(CryptFactory.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
