@@ -2,18 +2,23 @@ package crypter.gui.encryptsettings;
 
 import crypter.crypt.helpers.CryptTypes;
 import crypter.crypt.helpers.CryptedFile;
+import crypter.crypt.helpers.States;
 import crypter.gui.elements.AlertFactory;
 import crypter.gui.files.CryptController;
 import static crypter.gui.files.CryptController.mainStageSetDisabled;
-import crypter.gui.files.helpers.MyFile;
+import crypter.gui.files.helpers.FileItem;
 import crypter.gui.settings.Settings;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -21,6 +26,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
@@ -39,7 +45,7 @@ public class EncryptController implements Initializable {
     @FXML
     ProgressBar progressBar;
 
-    private EncryptTask task;
+    public EncryptTask task;
     private static ExecutorService executor;
 
     @Override
@@ -73,25 +79,32 @@ public class EncryptController implements Initializable {
             if (action.get().getButtonData() == ButtonData.OK_DONE) {
                 executor.execute(task);
                 closeStage();
+                executor.shutdown();
+
             } else {
                 //отмена действия
             }
         } else {
             executor.execute(task);
             closeStage();
+            executor.shutdown();
         }
     }
 
     private void encryptFile() {
         int i = 0;
         for (String filePath : CryptController.getFilesToEncryptPath()) {
-            MyFile file = (MyFile) CryptController.getFilesTab().getItems().get(i++);
+            FileItem file = (FileItem) CryptController.getFilesTab().getItems().get(i++);
             CryptedFile tempFile = CryptController.getCryptSystem().encryptFile(
                     CryptTypes.getCryptType(
                             this.choiceCryptType.getSelectionModel().getSelectedItem().toString()),
                     filePath, passField1.getText());
             file.setState(tempFile);
             CryptController.getFilesTab().refresh();
+            //список зашифрованных
+            if (file.getCryptInfo().getState() == States.SUCCESS_ENC) {
+                CryptController.getFilesListL().getItems().add(0, file);
+            }
         }
         closeStage();
     }
@@ -99,12 +112,12 @@ public class EncryptController implements Initializable {
     @FXML
     private void btCancelAction(ActionEvent event) {
         closeStage();
-        mainStageSetDisabled(false);
+      //  mainStageSetDisabled(false);
     }
 
     private void closeStage() {
         ((Stage) passField1.getScene().getWindow()).close();
-        mainStageSetDisabled(false);
+       // mainStageSetDisabled(false);
     }
 
     void loadMain() {
@@ -114,24 +127,23 @@ public class EncryptController implements Initializable {
             stage.setTitle("CRYPTOR");
             stage.setScene(new Scene(root));
             stage.show();
-            mainStageSetDisabled(false);
+            //mainStageSetDisabled(false);
         } catch (IOException ex) {
         }
     }
 
+    //задача шифрования
     class EncryptTask extends Task {
 
         @Override
         protected Integer call() throws Exception {
-
-            int i = 0;
-            for (String filePath : CryptController.getFilesToEncryptPath()) {
-                MyFile file = (MyFile) CryptController.getFilesTab().getItems().get(i++);
+            for (Object item : CryptController.getFilesTab().getItems()) {
+                FileItem file = (FileItem) item;
                 file.setStatusImage();
                 CryptController.getFilesTab().refresh();
                 CryptedFile tempFile = CryptController.getCryptSystem().encryptFile(
                         CryptTypes.getCryptType(choiceCryptType.getSelectionModel().getSelectedItem().toString()),
-                        filePath, passField1.getText());
+                        file.getAbsPath(), passField1.getText());
                 file.setState(tempFile);
                 CryptController.getFilesTab().refresh();
             }
@@ -140,9 +152,12 @@ public class EncryptController implements Initializable {
 
     }
 
-
     public static ExecutorService getExecutor() {
         return executor;
+    }
+
+    public static void stopTaks() {
+
     }
 
 }

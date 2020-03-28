@@ -1,7 +1,8 @@
-
 package crypter.gui.files.helpers;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Objects;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
@@ -15,12 +16,13 @@ public class FilePathTreeItem extends TreeItem<String> {
     public static Image folderCollapseImage = new Image(ClassLoader.getSystemResourceAsStream("res/folder.png"));
     public static Image folderExpandImage = new Image(ClassLoader.getSystemResourceAsStream("res/folder-open.png"));
     public static Image fileImage = new Image(ClassLoader.getSystemResourceAsStream("res/text-x-generic.png"));
-    
-    
+
     private boolean isLeaf;
     private boolean isFirstTimeChildren = true;
     private boolean isFirstTimeLeaf = true;
     private File file;
+
+    private static ArrayList<FilePathTreeItem> foldersList = new ArrayList<>();
 
     public File getFile() {
         return (this.file);
@@ -41,7 +43,7 @@ public class FilePathTreeItem extends TreeItem<String> {
         this.file = file;
         this.absolutePath = file.getAbsolutePath();
         this.isDirectory = file.isDirectory();
-        
+
         if (this.isDirectory) {
             this.setGraphic(new ImageView(folderCollapseImage));
             //add event handlers
@@ -50,6 +52,7 @@ public class FilePathTreeItem extends TreeItem<String> {
                 public void handle(Event e) {
                     FilePathTreeItem source = (FilePathTreeItem) e.getSource();
                     if (!source.isExpanded()) {
+                        foldersList.remove(source);
                         ImageView iv = (ImageView) source.getGraphic();
                         iv.setImage(folderCollapseImage);
                     }
@@ -60,6 +63,9 @@ public class FilePathTreeItem extends TreeItem<String> {
                 public void handle(Event e) {
                     FilePathTreeItem source = (FilePathTreeItem) e.getSource();
                     if (source.isExpanded()) {
+                        if (!foldersList.contains(source)) {
+                            foldersList.add(source);
+                        }
                         ImageView iv = (ImageView) source.getGraphic();
                         iv.setImage(folderExpandImage);
                     }
@@ -68,7 +74,7 @@ public class FilePathTreeItem extends TreeItem<String> {
         } else {
             this.setGraphic(new ImageView(fileImage));
         }
-        
+
         //set the value (which is what is displayed in the tree)
         String fullPath = file.getAbsolutePath();
         if (!fullPath.endsWith(File.separator)) {
@@ -107,12 +113,56 @@ public class FilePathTreeItem extends TreeItem<String> {
             if (files != null) {
                 ObservableList<FilePathTreeItem> children = FXCollections.observableArrayList();
                 for (File childFile : files) {
-                    children.add(new FilePathTreeItem(childFile));
+                    FilePathTreeItem childItem = new FilePathTreeItem(childFile);
+                    if (foldersList.contains(childItem)) {
+                        childItem.setExpanded(true);
+                    }
+                    children.add(childItem);
                 }
                 return (children);
             }
         }
         return FXCollections.emptyObservableList();
+    }
+
+    public static ArrayList<FilePathTreeItem> getExpandedFolders() {
+        return foldersList;
+    }
+
+    public void refreshFolderList() {
+        foldersList.clear();
+    }
+    
+    public static boolean isFolderExpanded(String folder) {
+        FilePathTreeItem temp = new FilePathTreeItem(new File(folder)) ;
+        if (foldersList.contains(temp)) {
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final FilePathTreeItem other = (FilePathTreeItem) obj;
+        if (!Objects.equals(this.absolutePath, other.absolutePath)) {
+            return false;
+        }
+        return true;
     }
 
 }

@@ -5,7 +5,7 @@ import crypter.crypt.helpers.CryptedFile;
 import crypter.gui.encryptsettings.EncryptController;
 import crypter.gui.files.CryptController;
 import static crypter.gui.files.CryptController.mainStageSetDisabled;
-import crypter.gui.files.helpers.MyFile;
+import crypter.gui.files.helpers.FileItem;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -87,7 +87,7 @@ public class DecryptController implements Initializable {
         protected Integer call() throws Exception {
             int i = 0;
             for (String filePath : CryptController.getFilesToEncryptPath()) {
-                MyFile file = (MyFile) CryptController.getFilesTab().getItems().get(i++);
+                FileItem file = (FileItem) CryptController.getFilesTab().getItems().get(i++);
                 file.setStatusImage();
                 CryptController.getFilesTab().refresh();
                 CryptedFile tempFile = CryptController.getCryptSystem().decryptFile(

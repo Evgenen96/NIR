@@ -3,6 +3,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
@@ -14,7 +15,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane prefHeight="530.0" prefWidth="810.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="crypter.gui.files.CryptController">
+<BorderPane fx:id="MainPain" prefHeight="530.0" prefWidth="810.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="crypter.gui.files.CryptController">
    <center>
       <HBox prefHeight="418.0" prefWidth="838.0" BorderPane.alignment="CENTER">
          <children>
@@ -32,9 +33,9 @@
                   </TreeView>
                   <ToolBar prefHeight="40.0" prefWidth="385.0">
                      <items>
-                        <Button mnemonicParsing="false">
+                        <Button mnemonicParsing="false" onAction="#btRefreshTreeAction">
                            <graphic>
-                              <ImageView fitHeight="16.0" fitWidth="16.0" onDragDetected="#btRefreshTreeAction" pickOnBounds="true" preserveRatio="true">
+                              <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
                                     <Image url="@../../../res/refresh.png" />
                                  </image>
@@ -68,9 +69,9 @@
                      <children>
                         <TableView fx:id="tableSelectedFiles" minHeight="350.0" prefHeight="366.0" prefWidth="359.0">
                           <columns>
-                            <TableColumn fx:id="colFileName" editable="false" prefWidth="191.66668701171875" style="-fx-alignment: CENTER-LEFT;" text="Имя файла" />
-                              <TableColumn fx:id="colFileType" editable="false" minWidth="0.0" prefWidth="39.66668701171875" style="-fx-alignment: CENTER-LEFT;" text="Тип" />
-                              <TableColumn fx:id="colFileSpace" editable="false" prefWidth="55.6666259765625" style="-fx-alignment: CENTER-LEFT;" text="Размер" />
+                            <TableColumn fx:id="colFileName" editable="false" prefWidth="191.66668701171875" sortable="false" style="-fx-alignment: CENTER-LEFT;" text="Имя файла" />
+                              <TableColumn fx:id="colFileType" editable="false" minWidth="0.0" prefWidth="39.66668701171875" sortable="false" style="-fx-alignment: CENTER-LEFT;" text="Тип" />
+                              <TableColumn fx:id="colFileSpace" editable="false" prefWidth="55.6666259765625" sortable="false" style="-fx-alignment: CENTER-LEFT;" text="Размер" />
                               <TableColumn fx:id="colFileStatus" editable="false" prefWidth="42.3333740234375" sortable="false" style="-fx-alignment: CENTER;" text="Статус" />
                               <TableColumn fx:id="colRemoveFile" editable="false" prefWidth="25.66668701171875" sortable="false" style="-fx-alignment: CENTER;" />
                           </columns>
@@ -100,7 +101,7 @@
       </HBox>
    </center>
    <top>
-      <ToolBar prefHeight="112.0" prefWidth="874.0">
+      <ToolBar prefHeight="63.0" prefWidth="810.0">
         <items>
             <HBox alignment="CENTER_LEFT" prefHeight="102.0" prefWidth="796.0">
                <children>
@@ -157,4 +158,12 @@
         </items>
       </ToolBar>
    </top>
+   <bottom>
+      <VBox BorderPane.alignment="CENTER">
+         <children>
+            <Label text="Список зашифрованных файлов" />
+            <ListView fx:id="cryptedFilesList" fixedCellSize="30.0" prefHeight="111.0" prefWidth="810.0" />
+         </children>
+      </VBox>
+   </bottom>
 </BorderPane>
