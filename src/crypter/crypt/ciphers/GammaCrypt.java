@@ -3,8 +3,7 @@ package crypter.crypt.ciphers;
 import crypter.crypt.helpers.CryptTypes;
 import crypter.crypt.helpers.EncryptedText;
 import crypter.crypt.helpers.Encryption;
-import crypter.gui.helpers.MyProgress;
-import javafx.concurrent.Task;
+
 
 public class GammaCrypt implements Encryption {
 
@@ -36,16 +35,10 @@ public class GammaCrypt implements Encryption {
 
     @Override
     public byte[] encryptFile(byte[] fileArray, String key) {
-
-        //EncryptTask task = new EncryptTask(fileArray, key);
         RandomLemer R = new RandomLemer(transfromKey(key));
-        int updateIteration = fileArray.length / 100;
         byte[] byteCipher = new byte[fileArray.length];
         for (int i = 0; i < fileArray.length; i++) {
             byteCipher[i] = (byte) (fileArray[i] ^ R.next());
-            if (i % updateIteration == 0) {
-                MyProgress.setNumber(i / fileArray.length);
-            }
         }
         return byteCipher;
     }
@@ -81,30 +74,6 @@ public class GammaCrypt implements Encryption {
             }
         }
         return intKey;
-    }
-
-    class EncryptTask extends Task<byte[]> {
-
-        byte[] fileArray;
-        String key;
-        byte[] byteCipher;
-
-        public EncryptTask(byte[] fileArray, String key) {
-            this.fileArray = fileArray;
-            this.key = key;
-
-        }
-
-        @Override
-        protected byte[] call() throws Exception {
-            RandomLemer R = new RandomLemer(transfromKey(key));
-            byteCipher = new byte[fileArray.length];
-            for (int i = 0; i < fileArray.length; i++) {
-                byteCipher[i] = (byte) (fileArray[i] ^ R.next());
-            }
-
-            return byteCipher;
-        }
     }
 }
 //реализцаия генератора псевдослучайных чисел методом Лемера

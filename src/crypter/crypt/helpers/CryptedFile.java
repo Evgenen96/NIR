@@ -1,20 +1,30 @@
 package crypter.crypt.helpers;
 
 import java.io.File;
+import java.io.Serializable;
 
-public class CryptedFile {
+public class CryptedFile implements Serializable {
 
     private File file;
-    private String key;
-    private CryptTypes crypt;
-    private States state;
+    private String date;
+    private transient String key;
+    private transient CryptTypes crypt;
+    private transient States state;
+    
+    public CryptedFile(File file) {
+        this.file = file;
+        this.date = date;
+        this.key = null;
+        this.crypt = null;
+        this.state = null;
+    }
 
-    public CryptedFile(File file, String key, CryptTypes crypt, States state) {
+    public CryptedFile(File file, String key, CryptTypes crypt, States state, String date) {
         this.file = file;
         this.key = key;
         this.crypt = crypt;
         this.state = state;
-        System.out.println(state.getDescription());
+        this.date = date;
     }
 
     public File getFile() {
@@ -48,5 +58,15 @@ public class CryptedFile {
     public void setState(States state) {
         this.state = state;
     }
+
+    public String getDate() {
+        return date;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
+    }
+    
+    
 
 }

@@ -1,10 +1,12 @@
 package crypter.gui.elements;
 
 import crypter.gui.files.helpers.FileItem;
-import javafx.scene.Node;
+import javafx.geometry.Pos;
+import javafx.scene.Group;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 public class FileListCellFactory {
@@ -20,33 +22,29 @@ public class FileListCellFactory {
                     } else {
                         String upp = item.getName();
                         String low = item.getAbsPath().substring(0, item.getAbsPath().lastIndexOf('\\') + 1);
-                        setGraphic(new CellContent(upp, low).getPopupContent());
+                        String date = item.getCryptedFile().getDate();
+                        CellContent cellContent = new CellContent(upp, low, date);
+                        setGraphic(cellContent);
                     }
                 }
-
             };
             return cell;
         });
-
     }
 }
 
-class CellContent {
+class CellContent extends Group {
 
-    private Node popupContent;
-    private Label upperRow;
-    private Label lowerRow;
-
-    public CellContent(String upp, String low) {
-        upperRow = new Label(upp);
-        lowerRow = new Label(low);
+    public CellContent(String upp, String low, String date) {
+        Label upperRow = new Label(upp);
+        Label lowerRow = new Label(low);
+        Label dateLabel = new Label("Зашифрован " + date);
         upperRow.setStyle("-fx-font-size: 1.0em ; -fx-font-weight: bold;");
         lowerRow.setStyle("-fx-font-size: 0.8em; ");
-        popupContent = new VBox(0, upperRow, lowerRow);
+        dateLabel.setStyle("-fx-font-size: 1.0em ; -fx-font-weight: bold;");
+        VBox leftBox = new VBox(0, upperRow, lowerRow);
+        HBox box = new HBox(5, leftBox, dateLabel);
+        box.setAlignment(Pos.CENTER);
+        this.getChildren().add(box);
     }
-
-    public Node getPopupContent() {
-        return popupContent;
-    }
-
 }

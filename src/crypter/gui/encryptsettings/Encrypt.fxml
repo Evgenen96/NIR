@@ -40,7 +40,6 @@
                         <Insets top="5.0" />
                      </VBox.margin>
                   </Line>
-                  <Label text="Придумайте ключ:" textAlignment="CENTER" />
                   <TextField fx:id="passField1" prefHeight="25.0" prefWidth="45.0" />
                   <Line endX="100.0" fill="#d6202000" startX="-100.0" strokeLineCap="ROUND" strokeLineJoin="ROUND" strokeWidth="3.0">
                      <stroke>
@@ -99,7 +98,7 @@
             </HBox>
             <VBox alignment="BOTTOM_LEFT" prefHeight="35.0" prefWidth="156.0">
                <children>
-                  <Button mnemonicParsing="false" prefHeight="25.0" prefWidth="200.0" text="Cохранить ключ в файл" />
+                  <Button fx:id="saveKeyBt" disable="true" mnemonicParsing="false" onAction="#saveKeyBtAction" prefHeight="25.0" prefWidth="200.0" text="Cохранить ключ в файл" />
                </children>
             </VBox>
          </children>

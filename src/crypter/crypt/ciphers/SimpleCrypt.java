@@ -92,7 +92,7 @@ public class SimpleCrypt implements Encryption {
         return byteFile;
     }
 
-    private int[] transformKey(String key) {
+    public static int[] transformKey(String key) {
         char[] keyArr = key.toLowerCase().toCharArray();
         int[] posArr = new int[keyArr.length];
         int rangForKey = keyArr.length - 1;

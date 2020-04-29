@@ -126,7 +126,7 @@
                         <Insets left="10.0" />
                      </HBox.margin>
                   </Button>
-                <Button alignment="CENTER" contentDisplay="TOP" mnemonicParsing="false" prefHeight="93.0" prefWidth="100.0" text="Настройки">
+                <Button alignment="CENTER" contentDisplay="TOP" mnemonicParsing="false" onAction="#btSettingsAction" prefHeight="93.0" prefWidth="100.0" text="Настройки">
                      <graphic>
                         <ImageView fitHeight="64.0" fitWidth="64.0" pickOnBounds="true" preserveRatio="true">
                            <image>
@@ -162,7 +162,7 @@
       <VBox BorderPane.alignment="CENTER">
          <children>
             <Label text="Список зашифрованных файлов" />
-            <ListView fx:id="cryptedFilesList" fixedCellSize="30.0" prefHeight="111.0" prefWidth="810.0" />
+            <ListView fx:id="fileHistory" fixedCellSize="30.0" prefHeight="111.0" prefWidth="810.0" />
          </children>
       </VBox>
    </bottom>

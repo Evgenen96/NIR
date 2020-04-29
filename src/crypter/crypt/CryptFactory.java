@@ -17,7 +17,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.crypto.NoSuchPaddingException;
@@ -32,7 +34,10 @@ public class CryptFactory {
     private RSA2Crypt rsaCrypt;
     private GammaCrypt gammaCrypt;
 
+    private SimpleDateFormat formatter;
+
     public CryptFactory() {
+        formatter = new SimpleDateFormat("yyyy-MM-dd 'at' HH:mm:ss z");
         codewordCrypt = new CodewordCrypt();
         vernameCrypt = new VernameCrypt();
         simpleCrypt = new SimpleCrypt();
@@ -90,11 +95,11 @@ public class CryptFactory {
     }
 
     public CryptedFile encryptFile(CryptTypes cryptType, String fileAbsPath, String key) {
-      
+
         try {
             byte[] fileArray = Files.readAllBytes(Paths.get(fileAbsPath));
             byte[] encryptedFile = null;
-            
+
             encryptedFile = this.getCrypt(cryptType).encryptFile(fileArray, key);
 
             //добавление метки, что файл зашифрован 
@@ -109,10 +114,11 @@ public class CryptFactory {
                 fos.write(markedEnFile);
             }
             File enFile = new File(cMark.changeExtension(fileAbsPath));
+            String date = formatter.format(new Date(System.currentTimeMillis()));
             System.out.println(fileAbsPath + " был зашифрован методом " + cryptType.getName());
-            return new CryptedFile(enFile, key, cryptType, States.SUCCESS_ENC);
+            return new CryptedFile(enFile, key, cryptType, States.SUCCESS_ENC, date);
         } catch (IOException ex) {
-            return new CryptedFile(null, key, cryptType, States.NO_FILE);
+            return new CryptedFile(null, key, cryptType, States.NO_FILE, null);
         }
     }
 
@@ -126,12 +132,12 @@ public class CryptFactory {
             if (cMark.readMark(fileArray)) {
                 fileArray = Arrays.copyOfRange(fileArray, cMark.getMarkLength() + 10, fileArray.length);
             } else {
-                return new CryptedFile(null, key, cryptType, States.NO_MARK);
+                return new CryptedFile(null, key, cryptType, States.NO_MARK, null);
             }
 
             //извлечение индекса
             if (!cMark.checkSecretKey(key)) {
-                return new CryptedFile(null, key, cryptType, States.WRONG_KEY);
+                return new CryptedFile(null, key, cryptType, States.WRONG_KEY, null);
             }
 
             //расшифровка
@@ -143,15 +149,15 @@ public class CryptFactory {
             fos.close();
 
             File deFile = new File(cMark.changeExtension(fileAbsPath));
+            String date = formatter.format(new Date(System.currentTimeMillis()));
             System.out.println(fileAbsPath + " был расшифрован методом " + cryptType.getName());
-            return new CryptedFile(deFile, key, cryptType, States.SUCCESS_DEC);
+            return new CryptedFile(deFile, key, cryptType, States.SUCCESS_DEC, date);
 
         } catch (IOException ex) {
-            return new CryptedFile(null, key, cryptType, States.NO_FILE);
+            return new CryptedFile(null, key, cryptType, States.NO_FILE, null);
         }
     }
 
-    
     //расшифровка без проверок
     public CryptedFile decryptFile(CryptTypes cryptType, String fileAbsPath, String key, boolean isForced) {
         try {
@@ -164,13 +170,13 @@ public class CryptFactory {
                 if (cMark.readMark(fileArray)) {
                     fileArray = Arrays.copyOfRange(fileArray, cMark.getMarkLength() + 10, fileArray.length);
                 } else {
-                    return new CryptedFile(null, key, cryptType, States.NO_MARK);
+                    return new CryptedFile(null, key, cryptType, States.NO_MARK, null);
                 }
             }
 
             //извлечение индекса
             if (!cMark.checkSecretKey(key) && !isForced) {
-                return new CryptedFile(null, key, cryptType, States.WRONG_KEY);
+                return new CryptedFile(null, key, cryptType, States.WRONG_KEY, null);
             }
 
             //расшифровка
@@ -182,11 +188,12 @@ public class CryptFactory {
             fos.close();
 
             File deFile = new File(cMark.changeExtension(fileAbsPath));
+            String date = formatter.format(new Date(System.currentTimeMillis()));
             System.out.println(fileAbsPath + " был расшифрован методом  " + cryptType.getName() + "без проверок");
-            return new CryptedFile(deFile, key, cryptType, States.SUCCESS_DEC);
+            return new CryptedFile(deFile, key, cryptType, States.SUCCESS_DEC, date);
 
         } catch (IOException ex) {
-            return new CryptedFile(null, key, cryptType, States.NO_FILE);
+            return new CryptedFile(null, key, cryptType, States.NO_FILE, null);
         }
     }
 

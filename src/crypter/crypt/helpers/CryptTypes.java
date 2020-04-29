@@ -22,9 +22,12 @@ public enum CryptTypes {
         }
         return null;
     }
+ 
     
     public String getName() {
         return CryptTypes.getName(this);
     }
+    
+    
 
 }

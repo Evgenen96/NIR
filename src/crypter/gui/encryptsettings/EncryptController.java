@@ -1,38 +1,35 @@
 package crypter.gui.encryptsettings;
 
 import crypter.crypt.helpers.CryptTypes;
-import crypter.crypt.helpers.CryptedFile;
-import crypter.crypt.helpers.States;
 import crypter.gui.elements.AlertFactory;
 import crypter.gui.files.CryptController;
 import static crypter.gui.files.CryptController.mainStageSetDisabled;
-import crypter.gui.files.helpers.FileItem;
+import crypter.gui.main.Controllers;
 import crypter.gui.settings.Settings;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Optional;
 import java.util.ResourceBundle;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.concurrent.Task;
+import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextField;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
@@ -43,10 +40,10 @@ public class EncryptController implements Initializable {
     @FXML
     ChoiceBox choiceCryptType;
     @FXML
-    ProgressBar progressBar;
+    Button saveKeyBt;
 
-    public EncryptTask task;
-    private static ExecutorService executor;
+    private CryptController mainController;
+    private Stage stage;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -55,16 +52,34 @@ public class EncryptController implements Initializable {
             this.choiceCryptType.getItems().add(CryptTypes.getName(CryptTypes.values()[i]));
         }
         choiceCryptType.getSelectionModel().selectFirst();
-        executor = Executors.newFixedThreadPool(2, new ThreadFactory() {
+        mainController = Controllers.getCryptController();
+        Platform.runLater(
+                () -> {
+                    stage = ((Stage) choiceCryptType.getScene().getWindow());
+
+                }
+        );
+        passField1.textProperty().addListener(new ChangeListener<String>() {
             @Override
-            public Thread newThread(Runnable r) {
-                Thread t = new Thread(r);
-                t.setDaemon(false);
-                return t;
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                if (newValue.length() != 0) {
+                    saveKeyBt.setDisable(false);
+                } else {
+                    saveKeyBt.setDisable(true);
+                }
             }
         });
-        task = new EncryptTask();
+        choiceCryptType.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                if (newValue.intValue() == 1) {
+                    passField1.setDisable(true);
+                } else {
+                    passField1.setDisable(false);
+                }
+            }
 
+        });
     }
 
     @FXML
@@ -77,49 +92,64 @@ public class EncryptController implements Initializable {
                     + "то данные в файле будут потеряны!",
                     "Зашифровать", "Отменить", 2);
             if (action.get().getButtonData() == ButtonData.OK_DONE) {
-                executor.execute(task);
+                mainController.setCryptData(this.getType(), null, this.getKey());
+                mainController.execEncryptTask();
                 closeStage();
-                executor.shutdown();
-
             } else {
-                //отмена действия
+                //отмена действия777
             }
         } else {
-            executor.execute(task);
+            mainController.setCryptData(this.getType(), null, this.getKey());
+            mainController.execEncryptTask();
             closeStage();
-            executor.shutdown();
         }
     }
 
-    private void encryptFile() {
-        int i = 0;
-        for (String filePath : CryptController.getFilesToEncryptPath()) {
-            FileItem file = (FileItem) CryptController.getFilesTab().getItems().get(i++);
-            CryptedFile tempFile = CryptController.getCryptSystem().encryptFile(
-                    CryptTypes.getCryptType(
-                            this.choiceCryptType.getSelectionModel().getSelectedItem().toString()),
-                    filePath, passField1.getText());
-            file.setState(tempFile);
-            CryptController.getFilesTab().refresh();
-            //список зашифрованных
-            if (file.getCryptInfo().getState() == States.SUCCESS_ENC) {
-                CryptController.getFilesListL().getItems().add(0, file);
-            }
+    @FXML
+    private void saveKeyBtAction(ActionEvent event) {
+        FileChooser fileChooser = new FileChooser();
+
+        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("TXT files (*.key)", "*.key");
+        fileChooser.getExtensionFilters().add(extFilter);
+
+        File file = fileChooser.showSaveDialog(stage);
+
+        if (file != null) {
+            saveTextToFile("key: " + getKey() + " "
+                    + "type: " + getType().getName(), file);
         }
-        closeStage();
+    }
+
+    private void saveTextToFile(String content, File file) {
+        try {
+            FileWriter writer;
+            writer = new FileWriter(file);
+            writer.append(content);
+            writer.close();
+        } catch (IOException ex) {
+            Logger.getLogger(EncryptController.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     @FXML
     private void btCancelAction(ActionEvent event) {
         closeStage();
-      //  mainStageSetDisabled(false);
     }
 
     private void closeStage() {
         ((Stage) passField1.getScene().getWindow()).close();
-       // mainStageSetDisabled(false);
+        mainStageSetDisabled(false);
     }
 
+    public String getKey() {
+        return this.passField1.getText();
+    }
+
+    public CryptTypes getType() {
+        return CryptTypes.getCryptType(this.choiceCryptType.getSelectionModel().getSelectedItem().toString());
+    }
+
+    //not used (old)
     void loadMain() {
         try {
             Parent root = FXMLLoader.load(getClass().getResource("/crypter/gui/files/FXML.fxml"));
@@ -127,37 +157,7 @@ public class EncryptController implements Initializable {
             stage.setTitle("CRYPTOR");
             stage.setScene(new Scene(root));
             stage.show();
-            //mainStageSetDisabled(false);
         } catch (IOException ex) {
         }
     }
-
-    //задача шифрования
-    class EncryptTask extends Task {
-
-        @Override
-        protected Integer call() throws Exception {
-            for (Object item : CryptController.getFilesTab().getItems()) {
-                FileItem file = (FileItem) item;
-                file.setStatusImage();
-                CryptController.getFilesTab().refresh();
-                CryptedFile tempFile = CryptController.getCryptSystem().encryptFile(
-                        CryptTypes.getCryptType(choiceCryptType.getSelectionModel().getSelectedItem().toString()),
-                        file.getAbsPath(), passField1.getText());
-                file.setState(tempFile);
-                CryptController.getFilesTab().refresh();
-            }
-            return null;
-        }
-
-    }
-
-    public static ExecutorService getExecutor() {
-        return executor;
-    }
-
-    public static void stopTaks() {
-
-    }
-
 }

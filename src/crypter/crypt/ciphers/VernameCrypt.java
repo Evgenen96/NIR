@@ -1,4 +1,4 @@
-package crypter.crypt.ciphers;
+    package crypter.crypt.ciphers;
 
 import crypter.crypt.helpers.CryptTypes;
 import crypter.crypt.helpers.EncryptedText;

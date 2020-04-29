@@ -61,7 +61,7 @@ public class AlertFactory {
         Alert alert = new Alert(type);
         alert.getDialogPane().applyCss();
         Node graphic = alert.getDialogPane().getGraphic();
-
+        
         alert.setDialogPane(new DialogPane() {
             @Override
             protected Node createDetailsButton() {

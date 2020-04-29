@@ -15,9 +15,8 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Background;
 
-
 //класс-строка в таблице списка выбранных файлов
-public class FileItem {
+public class FileItem  {
 
     private static CryptController crypt;
 
@@ -29,13 +28,14 @@ public class FileItem {
     private Button relove;
 
     private String absPath;
-    private CryptedFile file;
+    private CryptedFile cryptedFile;
     private static FileInputStream fis;
     private static Image i;
 
-  
-    public FileItem(File file) {
+    public FileItem(CryptedFile cryptedFile) {
         String extension;
+        this.cryptedFile = cryptedFile;
+        File file = cryptedFile.getFile();
         String fileName = file.getName();
         if (file.getName().contains(".")) {
             extension = fileName.substring(fileName.lastIndexOf('.') + 1, fileName.length());
@@ -95,22 +95,23 @@ public class FileItem {
         status.setBackground(Background.EMPTY);
         status.setBlendMode(BlendMode.MULTIPLY);
         ImageView iv = new ImageView(i);
-        //iv.setBlendMode(BlendMode.ADD);
         status.setGraphic(iv);
     }
 
     //апдейт записи в таблице
     public void setState(CryptedFile cryptedFile) {
-        this.file = cryptedFile;
+        this.cryptedFile = cryptedFile;
 
-        if (file.getFile() == null) {
+        if (cryptedFile.getFile() == null) {
+            status = new Button();
+            status.setBackground(Background.EMPTY);
             relove = crypt.getTableButton(this);
             return;
         }
         status = crypt.getTableButton(this);
         String extension;
-        String fileName = file.getFile().getName();
-        if (file.getFile().getName().contains(".")) {
+        String fileName = cryptedFile.getFile().getName();
+        if (cryptedFile.getFile().getName().contains(".")) {
             extension = fileName.substring(fileName.lastIndexOf('.') + 1, fileName.length());
             fileName = fileName.substring(0, fileName.length() - extension.length() - 1);
         } else {
@@ -120,7 +121,7 @@ public class FileItem {
         type = new SimpleStringProperty(extension);
 
         //подсчет размера
-        double fileSpace = file.getFile().length();
+        double fileSpace = cryptedFile.getFile().length();
         double div;
         int count = 0;
         String size = "";
@@ -149,15 +150,15 @@ public class FileItem {
             }
         }
         space = new SimpleStringProperty(String.format("%.2f", fileSpace) + size);
-        absPath = file.getFile().getAbsolutePath();
+        absPath = cryptedFile.getFile().getAbsolutePath();
     }
 
     public static void setCrypt(CryptController crypt) {
         FileItem.crypt = crypt;
     }
 
-    public CryptedFile getCryptInfo() {
-        return file;
+    public CryptedFile getCryptedFile() {
+        return cryptedFile;
     }
 
     public String getName() {
@@ -220,7 +221,5 @@ public class FileItem {
     public String toString() {
         return getName();
     }
-    
-    
 
 }
